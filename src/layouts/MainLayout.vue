@@ -25,13 +25,7 @@
       show-if-above
       bordered
     >
-      <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
-        </q-item-label>
-
+      <q-list class="q-py-sm">
         <EssentialLink
           v-for="link in linksList"
           :key="link.title"
@@ -56,6 +50,10 @@ defineOptions({
 })
 
 const linksList = [
+  {
+    title: 'User Profile',
+    icon: 'person'
+  },
   {
     title: 'Games',
     //caption: 'quasar.dev',
