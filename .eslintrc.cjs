@@ -63,6 +63,7 @@ module.exports = {
     'semi': 'off',
     'spaced-comment': 'off',
     'comma-dangle': 'off',
+    'space-before-function-paren': 'off',
 
     'import/first': 'off',
     'import/named': 'error',
