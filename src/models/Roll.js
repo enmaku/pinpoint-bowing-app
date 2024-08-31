@@ -1,7 +1,7 @@
 export default class Roll {
   constructor(rollNumber) {
     this._rollNumber = rollNumber;
-    this._pins = 0;
+    this._pins = null;
     this._strike = false;
     this._spare = false;
     this._split = false;

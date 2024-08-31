@@ -66,6 +66,7 @@ module.exports = {
     'space-before-function-paren': 'off',
     'quotes': 'off',
     'eqeqeq': 'off',
+    'space-infix-ops': 'off',
 
     'import/first': 'off',
     'import/named': 'error',

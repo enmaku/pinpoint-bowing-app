@@ -43,7 +43,7 @@ export default class Frame {
         if (value == 10 && previousValue > 0) {
           this._rolls[rollIndex].strike = true;
         }
-        if (value == 10 && previousValue == 0) {
+        if (value != 10 && value + previousValue == 10) {
           this._rolls[rollIndex].spare = true;
         }
       }
