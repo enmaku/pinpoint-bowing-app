@@ -12,14 +12,13 @@
         </div>
       </q-card-section>
       <q-card-section class="q-pa-none">
-        <!-- row -->
-        <div v-for="scorecard in game.scoreCards" :key="scorecard.id">
-          <div class="row">
-            <div class="col-1 justify-center items-center flex">
+        <div v-for="scorecard in game.scoreCards" :key="scorecard.id" class="q-py-none">
+          <div class="row q-py-none">
+            <div class="col-1 justify-center items-center flex q-py-none q-pr-xs">
               <q-avatar class="scaleavatar" :color="scorecard.bowlerColor" text-color="white">{{ scorecard.bowlerName.substring(0, 1) }}</q-avatar>
             </div>
             <template v-for="frame in scorecard.frames" :key="frame.frameNumber">
-              <div :class="frame.frameNumber == 10 ? 'col-2' : 'col-1'">
+              <div :class="frame.frameNumber == 10 ? 'col-2 q-pa-none' : 'col-1 q-pa-none'">
                 <div class="row">
                   <div v-for="roll in frame.getRollScores()" :key="roll.rollNumber" class="col scorecard">
                     {{ roll.strike ? 'X' : roll.spare ? '/' : roll.pins == null ? '-' : roll.pins }}
@@ -33,6 +32,7 @@
               </div>
             </template>
           </div>
+          <div class="q-py-xs"></div>
         </div>
       </q-card-section>
     </q-card>
@@ -41,7 +41,7 @@
 
 <style>
   .scorecard {
-    border: 1px solid black;
+    border: 0.25vmin solid black;
     text-align: center;
     font-size: 3.2vw;
     font-weight: bolder;
