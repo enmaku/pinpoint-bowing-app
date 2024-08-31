@@ -1,0 +1,439 @@
+{
+    "_id": "game_8408239ed4f1a",
+    "_name": "New Game",
+    "_bowlers": [
+        "bowler_fdd94f7bb058a",
+        "bowler_b6bb31abe943"
+    ],
+    "_scoreCards": [
+        {
+            "_bowlerId": "bowler_fdd94f7bb058a",
+            "_bowlerName": "Dave",
+            "_bowlerColor": "red",
+            "_frames": [
+                {
+                    "_frameNumber": 1,
+                    "_rolls": [
+                        {
+                            "_rollNumber": 1,
+                            "_pins": 7,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 2,
+                            "_pins": 3,
+                            "_strike": false,
+                            "_spare": true,
+                            "_split": false
+                        }
+                    ],
+                    "_frameScore": 16
+                },
+                {
+                    "_frameNumber": 2,
+                    "_rolls": [
+                        {
+                            "_rollNumber": 1,
+                            "_pins": 6,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 2,
+                            "_pins": 2,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        }
+                    ],
+                    "_frameScore": 24
+                },
+                {
+                    "_frameNumber": 3,
+                    "_rolls": [
+                        {
+                            "_rollNumber": 1,
+                            "_pins": 10,
+                            "_strike": true,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 2,
+                            "_pins": 0,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        }
+                    ],
+                    "_frameScore": 41
+                },
+                {
+                    "_frameNumber": 4,
+                    "_rolls": [
+                        {
+                            "_rollNumber": 1,
+                            "_pins": 5,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 2,
+                            "_pins": 2,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        }
+                    ],
+                    "_frameScore": 48
+                },
+                {
+                    "_frameNumber": 5,
+                    "_rolls": [
+                        {
+                            "_rollNumber": 1,
+                            "_pins": 0,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 2,
+                            "_pins": 10,
+                            "_strike": false,
+                            "_spare": true,
+                            "_split": false
+                        }
+                    ],
+                    "_frameScore": 64
+                },
+                {
+                    "_frameNumber": 6,
+                    "_rolls": [
+                        {
+                            "_rollNumber": 1,
+                            "_pins": 6,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 2,
+                            "_pins": 4,
+                            "_strike": false,
+                            "_spare": true,
+                            "_split": false
+                        }
+                    ],
+                    "_frameScore": 83
+                },
+                {
+                    "_frameNumber": 7,
+                    "_rolls": [
+                        {
+                            "_rollNumber": 1,
+                            "_pins": 9,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 2,
+                            "_pins": 0,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        }
+                    ],
+                    "_frameScore": 92
+                },
+                {
+                    "_frameNumber": 8,
+                    "_rolls": [
+                        {
+                            "_rollNumber": 1,
+                            "_pins": 10,
+                            "_strike": true,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 2,
+                            "_pins": 0,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        }
+                    ],
+                    "_frameScore": 112
+                },
+                {
+                    "_frameNumber": 9,
+                    "_rolls": [
+                        {
+                            "_rollNumber": 1,
+                            "_pins": 8,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 2,
+                            "_pins": 2,
+                            "_strike": false,
+                            "_spare": true,
+                            "_split": false
+                        }
+                    ],
+                    "_frameScore": 132
+                },
+                {
+                    "_frameNumber": 10,
+                    "_rolls": [
+                        {
+                            "_rollNumber": 1,
+                            "_pins": 10,
+                            "_strike": true,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 2,
+                            "_pins": 10,
+                            "_strike": true,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 3,
+                            "_pins": 10,
+                            "_strike": true,
+                            "_spare": false,
+                            "_split": false
+                        }
+                    ],
+                    "_frameScore": 162
+                }
+            ]
+        },
+        {
+            "_bowlerId": "bowler_b6bb31abe943",
+            "_bowlerName": "Lisa",
+            "_bowlerColor": "green",
+            "_frames": [
+                {
+                    "_frameNumber": 1,
+                    "_rolls": [
+                        {
+                            "_rollNumber": 1,
+                            "_pins": 6,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 2,
+                            "_pins": 3,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        }
+                    ],
+                    "_frameScore": 9
+                },
+                {
+                    "_frameNumber": 2,
+                    "_rolls": [
+                        {
+                            "_rollNumber": 1,
+                            "_pins": 7,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 2,
+                            "_pins": 3,
+                            "_strike": false,
+                            "_spare": true,
+                            "_split": false
+                        }
+                    ],
+                    "_frameScore": 29
+                },
+                {
+                    "_frameNumber": 3,
+                    "_rolls": [
+                        {
+                            "_rollNumber": 1,
+                            "_pins": 10,
+                            "_strike": true,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 2,
+                            "_pins": 0,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        }
+                    ],
+                    "_frameScore": 49
+                },
+                {
+                    "_frameNumber": 4,
+                    "_rolls": [
+                        {
+                            "_rollNumber": 1,
+                            "_pins": 5,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 2,
+                            "_pins": 5,
+                            "_strike": false,
+                            "_spare": true,
+                            "_split": false
+                        }
+                    ],
+                    "_frameScore": 69
+                },
+                {
+                    "_frameNumber": 5,
+                    "_rolls": [
+                        {
+                            "_rollNumber": 1,
+                            "_pins": 10,
+                            "_strike": true,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 2,
+                            "_pins": 0,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        }
+                    ],
+                    "_frameScore": 89
+                },
+                {
+                    "_frameNumber": 6,
+                    "_rolls": [
+                        {
+                            "_rollNumber": 1,
+                            "_pins": 10,
+                            "_strike": true,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 2,
+                            "_pins": 0,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        }
+                    ],
+                    "_frameScore": 109
+                },
+                {
+                    "_frameNumber": 7,
+                    "_rolls": [
+                        {
+                            "_rollNumber": 1,
+                            "_pins": 0,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 2,
+                            "_pins": 10,
+                            "_strike": false,
+                            "_spare": true,
+                            "_split": false
+                        }
+                    ],
+                    "_frameScore": 129
+                },
+                {
+                    "_frameNumber": 8,
+                    "_rolls": [
+                        {
+                            "_rollNumber": 1,
+                            "_pins": 10,
+                            "_strike": true,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 2,
+                            "_pins": 0,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        }
+                    ],
+                    "_frameScore": 149
+                },
+                {
+                    "_frameNumber": 9,
+                    "_rolls": [
+                        {
+                            "_rollNumber": 1,
+                            "_pins": 8,
+                            "_strike": false,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 2,
+                            "_pins": 2,
+                            "_strike": false,
+                            "_spare": true,
+                            "_split": false
+                        }
+                    ],
+                    "_frameScore": 169
+                },
+                {
+                    "_frameNumber": 10,
+                    "_rolls": [
+                        {
+                            "_rollNumber": 1,
+                            "_pins": 10,
+                            "_strike": true,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 2,
+                            "_pins": 10,
+                            "_strike": true,
+                            "_spare": false,
+                            "_split": false
+                        },
+                        {
+                            "_rollNumber": 3,
+                            "_pins": 10,
+                            "_strike": true,
+                            "_spare": false,
+                            "_split": false
+                        }
+                    ],
+                    "_frameScore": 199
+                }
+            ]
+        }
+    ],
+    "_timestamp": "8/31/2024, 2:30:49 AM"
+}

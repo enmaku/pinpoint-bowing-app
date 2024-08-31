@@ -64,6 +64,8 @@ module.exports = {
     'spaced-comment': 'off',
     'comma-dangle': 'off',
     'space-before-function-paren': 'off',
+    'quotes': 'off',
+    'eqeqeq': 'off',
 
     'import/first': 'off',
     'import/named': 'error',
