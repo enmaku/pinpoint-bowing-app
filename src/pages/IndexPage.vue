@@ -1,64 +1,33 @@
 <template>
   <q-page>
-    <q-card style="width: 100%; height: auto;" class="q-pa-xs">
-      <q-card-section class="q-pa-none">
-        <div class="row flex">
-          <div class="col-1"></div>
-          <div class="col flex items-center">
-            <strong style="font-size: 4vw;">{{ game.name }}</strong>
-            <q-space />
-            <span class="text-caption text-grey-8" style="font-size: 2.5vw;">{{ game.timestamp }}</span>
-          </div>
-        </div>
-      </q-card-section>
-      <q-card-section class="q-pa-none">
-        <div v-for="scorecard in game.scoreCards" :key="scorecard.id" class="q-py-none">
-          <div class="row q-py-none">
-            <div class="col-1 justify-center items-center flex q-py-none q-pr-xs">
-              <q-avatar class="scaleavatar" :color="scorecard.bowlerColor" text-color="white">{{ scorecard.bowlerName.substring(0, 1) }}</q-avatar>
-            </div>
-            <template v-for="frame in scorecard.frames" :key="frame.frameNumber">
-              <div :class="frame.frameNumber == 10 ? 'col-2 q-pa-none' : 'col-1 q-pa-none'">
-                <div class="row">
-                  <div v-for="roll in frame.getRollScores()" :key="roll.rollNumber" class="col scorecard">
-                    {{ roll.strike ? 'X' : roll.spare ? '/' : roll.pins == null ? '-' : roll.pins }}
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col scorecard">
-                    {{ frame.frameScore == 0 ? '-' : frame.frameScore }}
-                  </div>
-                </div>
-              </div>
-            </template>
-          </div>
-          <div class="q-py-xs"></div>
-        </div>
-      </q-card-section>
-    </q-card>
+    <GameRecord :game="game" style="height: 50% !important;" />
+      <q-card class="fixed-bottom" style="width: 100% !important;">
+        <q-card-section>
+          <q-expansion-item
+            dense
+            dense-toggle
+            icon="keyboard"
+            label="Scoring"
+            expand-icon="keyboard_arrow_up"
+            expanded-icon="keyboard_arrow_down"
+          >
+            <EntryPanel />
+          </q-expansion-item>
+        </q-card-section>
+      </q-card>
   </q-page>
 </template>
 
 <style>
-  .scorecard {
-    border: 0.25vmin solid black;
-    text-align: center;
-    font-size: 3.2vw;
-    font-weight: bolder;
-  }
 
-  .scaleavatar {
-    height: 7vw;
-    width: 7vw;
-    font-size: 7vw;
-  }
 </style>
 
 <script setup>
 import { ref } from 'vue';
-// import PinDiagram from 'components/PinDiagram.vue';
 import Bowler from 'src/models/Bowler.js';
 import Game from 'src/models/Game.js';
+import GameRecord from 'src/components/GameRecord.vue';
+import EntryPanel from 'src/components/EntryPanel.vue';
 
 const game = ref(new Game());
 
@@ -135,7 +104,7 @@ game.value.scoreCards[2].setScore(10, 1, 9);
 game.value.scoreCards[2].setScore(10, 2, 1);
 game.value.scoreCards[2].setScore(10, 3, 10);
 
-console.log(JSON.stringify(game.value));
+console.log(JSON.stringify(game.value.scoreCards[0]));
 
 defineOptions({
   name: 'IndexPage'

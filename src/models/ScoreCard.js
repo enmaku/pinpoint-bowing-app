@@ -23,6 +23,7 @@ export default class ScoreCard {
       this._frames[frameIndex].frameScore = 0;
     }
     let score = 0;
+
     for (let f = 1; f <= 9; f++) {
       const frameIndex = this._frames.map(frame => frame.frameNumber).indexOf(f);
       let frameScore = 0;

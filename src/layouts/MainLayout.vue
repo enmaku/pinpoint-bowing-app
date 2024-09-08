@@ -13,7 +13,6 @@
 
         <q-toolbar-title>
           PinPoint
-          <q-icon :name="mapBowlingAlley" />
         </q-toolbar-title>
 
         <div>v0.1a</div>
@@ -43,7 +42,7 @@
 <script setup>
 import { ref } from 'vue'
 import EssentialLink from 'components/EssentialLink.vue'
-import { mapBowlingAlley } from 'quasar-extras-svg-icons/map-icons'
+import { mapBowlingAlley } from 'quasar-extras-svg-icons/map-icons';
 
 defineOptions({
   name: 'MainLayout'

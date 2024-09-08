@@ -5,6 +5,7 @@ export default class Roll {
     this._strike = false;
     this._spare = false;
     this._split = false;
+    this._pinData = null;
   }
 
   get rollNumber() {
@@ -41,5 +42,19 @@ export default class Roll {
 
   set split(split) {
     this._split = split;
+  }
+
+  get pinData() {
+    if (this._pinData == null) {
+      return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    }
+    return this._pinData;
+  }
+
+  set pinData(pinData) {
+    if (this._pinData == null) {
+      this._pinData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    }
+    this._pinData = pinData;
   }
 }
