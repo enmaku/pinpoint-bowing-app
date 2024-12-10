@@ -42,12 +42,6 @@
           label="Generate Sample Games"
         />
         <q-fab-action
-          color="primary"
-          @click="startNewGame"
-          icon="sports"
-          label="Start New Game"
-        />
-        <q-fab-action
           v-if="hasData"
           color="negative"
           @click="store.clearAllData"
@@ -69,10 +63,6 @@ const store = useBowlingStore();
 
 const games = computed(() => store.games);
 const hasData = computed(() => store.bowlers.length > 0 || store.games.length > 0);
-
-function startNewGame() {
-  // Your existing startNewGame logic here
-}
 
 const showDialog = ref(false);
 const numGames = ref(1);
