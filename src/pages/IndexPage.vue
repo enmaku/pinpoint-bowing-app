@@ -1,113 +1,102 @@
 <template>
-  <q-page>
-    <GameRecord :game="game" style="height: 50% !important;" />
-      <q-card class="fixed-bottom" style="width: 100% !important;">
+  <q-page class="q-pb-xl">
+    <div v-if="games.length > 0" class="q-pa-md">
+      <div v-for="game in games" :key="game.id" class="q-mb-md">
+        <GameRecord :game="game" />
+      </div>
+    </div>
+
+    <div v-else class="text-center q-pa-md">
+      <p class="text-h6">No games yet!</p>
+      <p>Start a new game or generate sample games to get started.</p>
+    </div>
+
+    <q-dialog v-model="showDialog" persistent>
+      <q-card style="min-width: 350px">
         <q-card-section>
-          <q-expansion-item
-            dense
-            dense-toggle
-            icon="keyboard"
-            label="Scoring"
-            expand-icon="keyboard_arrow_up"
-            expanded-icon="keyboard_arrow_down"
-          >
-            <EntryPanel />
-          </q-expansion-item>
+          <div class="text-h6">Generate Games</div>
         </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <q-input
+            v-model.number="numGames"
+            type="number"
+            label="Number of games to generate"
+            :rules="[val => val > 0 || 'Please enter a number greater than 0']"
+          />
+        </q-card-section>
+
+        <q-card-actions align="right" class="text-primary">
+          <q-btn flat label="Cancel" v-close-popup />
+          <q-btn flat label="Generate" @click="generateGames" v-close-popup />
+        </q-card-actions>
       </q-card>
+    </q-dialog>
+
+    <q-page-sticky position="bottom" :offset="[18, 18]">
+      <q-fab icon="add" direction="up" color="primary">
+        <q-fab-action
+          color="primary"
+          @click="showDialog = true"
+          icon="casino"
+          label="Generate Sample Games"
+        />
+        <q-fab-action
+          color="primary"
+          @click="startNewGame"
+          icon="sports"
+          label="Start New Game"
+        />
+        <q-fab-action
+          v-if="hasData"
+          color="negative"
+          @click="store.clearAllData"
+          icon="delete_forever"
+          label="Clear All Data"
+        />
+      </q-fab>
+    </q-page-sticky>
   </q-page>
 </template>
 
-<style>
-
-</style>
-
 <script setup>
-import { ref } from 'vue';
-import Bowler from 'src/models/Bowler.js';
-import Game from 'src/models/Game.js';
+import { computed, onMounted, ref } from 'vue';
 import GameRecord from 'src/components/GameRecord.vue';
-import EntryPanel from 'src/components/EntryPanel.vue';
+import { useBowlingStore } from 'src/stores/bowling-store';
+import { generateSampleGame } from 'src/utils/gameGenerator';
 
-const game = ref(new Game());
+const store = useBowlingStore();
 
-const bowler1 = ref(new Bowler());
-bowler1.value.name = 'Dave';
-bowler1.value.color = 'red';
-game.value.addBowler(bowler1.value);
-bowler1.value.addGame(game.value.id);
+const games = computed(() => store.games);
+const hasData = computed(() => store.bowlers.length > 0 || store.games.length > 0);
 
-const bowler2 = ref(new Bowler());
-bowler2.value.name = 'Lisa';
-bowler2.value.color = 'green';
-game.value.addBowler(bowler2.value);
-bowler2.value.addGame(game.value.id);
+function startNewGame() {
+  // Your existing startNewGame logic here
+}
 
-const bowler3 = ref(new Bowler());
-bowler3.value.name = 'Brian';
-bowler3.value.color = 'warning';
-game.value.addBowler(bowler3.value);
-bowler3.value.addGame(game.value.id);
+const showDialog = ref(false);
+const numGames = ref(1);
 
-game.value.scoreCards[0].setScore(1, 1, 7);
-game.value.scoreCards[0].setScore(1, 2, 3);
-game.value.scoreCards[0].setScore(2, 1, 6);
-game.value.scoreCards[0].setScore(2, 2, 2);
-game.value.scoreCards[0].setScore(3, 1, 10);
-game.value.scoreCards[0].setScore(4, 1, 5);
-game.value.scoreCards[0].setScore(4, 2, 2);
-game.value.scoreCards[0].setScore(5, 1, 0);
-game.value.scoreCards[0].setScore(5, 2, 10);
-game.value.scoreCards[0].setScore(6, 1, 6);
-game.value.scoreCards[0].setScore(6, 2, 4);
-game.value.scoreCards[0].setScore(7, 1, 9);
-game.value.scoreCards[0].setScore(7, 2, 0);
-game.value.scoreCards[0].setScore(8, 1, 10);
-game.value.scoreCards[0].setScore(9, 1, 8);
-game.value.scoreCards[0].setScore(9, 2, 2);
-game.value.scoreCards[0].setScore(10, 1, 7);
-game.value.scoreCards[0].setScore(10, 2, 3);
-game.value.scoreCards[0].setScore(10, 3, 10);
+const generateGames = () => {
+  const count = parseInt(numGames.value);
+  if (count > 0) {
+    for (let i = 0; i < count; i++) {
+      generateSampleGame();
+    }
+  }
+};
 
-game.value.scoreCards[1].setScore(1, 1, 6);
-game.value.scoreCards[1].setScore(1, 2, 3);
-game.value.scoreCards[1].setScore(2, 1, 7);
-game.value.scoreCards[1].setScore(2, 2, 3);
-game.value.scoreCards[1].setScore(3, 1, 10);
-game.value.scoreCards[1].setScore(4, 1, 5);
-game.value.scoreCards[1].setScore(4, 2, 5);
-game.value.scoreCards[1].setScore(5, 1, 10);
-game.value.scoreCards[1].setScore(6, 1, 10);
-game.value.scoreCards[1].setScore(7, 1, 0);
-game.value.scoreCards[1].setScore(7, 2, 10);
-game.value.scoreCards[1].setScore(8, 1, 10);
-game.value.scoreCards[1].setScore(9, 1, 8);
-game.value.scoreCards[1].setScore(9, 2, 2);
-game.value.scoreCards[1].setScore(10, 1, 9);
-game.value.scoreCards[1].setScore(10, 2, 0);
-
-game.value.scoreCards[2].setScore(1, 1, 9);
-game.value.scoreCards[2].setScore(1, 2, 0);
-game.value.scoreCards[2].setScore(2, 1, 7);
-game.value.scoreCards[2].setScore(2, 2, 2);
-game.value.scoreCards[2].setScore(3, 1, 10);
-game.value.scoreCards[2].setScore(4, 1, 8);
-game.value.scoreCards[2].setScore(4, 2, 2);
-game.value.scoreCards[2].setScore(5, 1, 10);
-game.value.scoreCards[2].setScore(6, 1, 10);
-game.value.scoreCards[2].setScore(7, 1, 2);
-game.value.scoreCards[2].setScore(7, 2, 6);
-game.value.scoreCards[2].setScore(8, 1, 10);
-game.value.scoreCards[2].setScore(9, 1, 8);
-game.value.scoreCards[2].setScore(9, 2, 2);
-game.value.scoreCards[2].setScore(10, 1, 9);
-game.value.scoreCards[2].setScore(10, 2, 1);
-game.value.scoreCards[2].setScore(10, 3, 10);
-
-console.log(JSON.stringify(game.value.scoreCards[0]));
+onMounted(() => {
+  store.initializeStore();
+});
 
 defineOptions({
   name: 'IndexPage'
-})
-
+});
 </script>
+
+<style scoped>
+.q-fab-action {
+  min-width: 200px;
+}
+</style>

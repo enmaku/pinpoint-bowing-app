@@ -6,6 +6,7 @@ export default class Roll {
     this._spare = false;
     this._split = false;
     this._pinData = null;
+    this._foul = false;
   }
 
   get rollNumber() {
@@ -42,6 +43,14 @@ export default class Roll {
 
   set split(split) {
     this._split = split;
+  }
+
+  get foul() {
+    return this._foul;
+  }
+
+  set foul(foul) {
+    this._foul = foul;
   }
 
   get pinData() {

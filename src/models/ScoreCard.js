@@ -1,4 +1,4 @@
-import Frame from "./Frame";
+import Frame from './Frame';
 
 export default class ScoreCard {
   constructor(bowler) {
@@ -11,77 +11,78 @@ export default class ScoreCard {
     ];
   }
 
-  setScore(frameNumber, rollNumber, value) {
-    const frameIndex = this._frames.map(frame => frame.frameNumber).indexOf(frameNumber);
-    this._frames[frameIndex].setRollScore(rollNumber, value);
-    this.updateFrameScores();
+  get bowlerId() { return this._bowlerId; }
+  get bowlerName() { return this._bowlerName; }
+  get bowlerColor() { return this._bowlerColor; }
+  get frames() { return this._frames; }
+
+  getCurrentFrame() {
+    for (const frame of this._frames) {
+      for (const roll of frame.rolls) {
+        if (roll.pins === undefined || roll.pins === null) {
+          return frame;
+        }
+      }
+    }
+    return null;
+  }
+
+  setScore(frameNumber, rollNumber, value, pinData, split) {
+    const frame = this._frames.find(f => f.frameNumber === frameNumber);
+    if (frame) {
+      frame.setRollScore(rollNumber, value, pinData, split);
+      this.updateFrameScores();
+    }
   }
 
   updateFrameScores() {
     for (let f = 1; f <= 9; f++) {
-      const frameIndex = this._frames.map(frame => frame.frameNumber).indexOf(f);
-      this._frames[frameIndex].frameScore = 0;
+      const frame = this._frames.find(frame => frame.frameNumber === f);
+      if (frame) frame.frameScore = 0;
     }
     let score = 0;
 
     for (let f = 1; f <= 9; f++) {
-      const frameIndex = this._frames.map(frame => frame.frameNumber).indexOf(f);
+      const frame = this._frames.find(frame => frame.frameNumber === f);
+      if (!frame) continue;
+
       let frameScore = 0;
       for (let r = 1; r <= 2; r++) {
-        const rollIndex = this._frames[frameIndex].rolls.map(roll => roll.rollNumber).indexOf(r);
-        frameScore += this._frames[frameIndex].rolls[rollIndex].pins;
-        if (this._frames[frameIndex].rolls[rollIndex].strike || this._frames[frameIndex].rolls[rollIndex].spare) {
-          const nextFrameIndex = this._frames.map(frame => frame.frameNumber).indexOf(f + 1);
-          const roll1Index = this._frames[nextFrameIndex].rolls.map(roll => roll.rollNumber).indexOf(1);
-          frameScore += this._frames[nextFrameIndex].rolls[roll1Index].pins;
-          if (this._frames[frameIndex].rolls[rollIndex].strike) {
-            const roll2Index = this._frames[nextFrameIndex].rolls.map(roll => roll.rollNumber).indexOf(2);
-            frameScore += this._frames[nextFrameIndex].rolls[roll2Index].pins;
-          }
-        }
-      }
-      score += frameScore
+        const roll = frame.rolls.find(roll => roll.rollNumber === r);
+        if (!roll) continue;
 
-      this._frames[frameIndex].frameScore = score;
-    };
-    const finalFrameIndex = this._frames.map(frame => frame.frameNumber).indexOf(10);
-    let frameScore = 0;
-    for (let r = 1; r <= 3; r++) {
-      const rollIndex = this._frames[finalFrameIndex].rolls.map(roll => roll.rollNumber).indexOf(r);
-      score += this._frames[finalFrameIndex].rolls[rollIndex].pins;
-      if (this._frames[finalFrameIndex].rolls[rollIndex].spare || this._frames[finalFrameIndex].rolls[rollIndex].strike) {
-        if (r <= 2) {
-          const roll1Index = this._frames[finalFrameIndex].rolls.map(roll => roll.rollNumber).indexOf(r + 1);
-          frameScore += this._frames[finalFrameIndex].rolls[roll1Index].pins;
-          if (this._frames[finalFrameIndex].rolls[rollIndex].strike && r == 1) {
-            const roll2Index = this._frames[finalFrameIndex].rolls.map(roll => roll.rollNumber).indexOf(r + 2);
-            frameScore += this._frames[finalFrameIndex].rolls[roll2Index].pins;
+        frameScore += roll.pins || 0;
+        if (roll.strike || roll.spare) {
+          const nextFrame = this._frames.find(frame => frame.frameNumber === f + 1);
+          if (nextFrame) {
+            const nextRoll1 = nextFrame.rolls.find(roll => roll.rollNumber === 1);
+            if (nextRoll1) frameScore += nextRoll1.pins || 0;
+
+            if (roll.strike) {
+              const nextRoll2 = nextFrame.rolls.find(roll => roll.rollNumber === 2);
+              if (nextRoll2) frameScore += nextRoll2.pins || 0;
+            }
           }
         }
       }
+      score += frameScore;
+      frame.frameScore = score;
     }
-    this._frames[finalFrameIndex].frameScore = score;
+
+    // Handle final frame
+    const finalFrame = this._frames.find(frame => frame.frameNumber === 10);
+    if (finalFrame) {
+      for (let r = 1; r <= 3; r++) {
+        const roll = finalFrame.rolls.find(roll => roll.rollNumber === r);
+        if (roll) score += roll.pins || 0;
+      }
+      finalFrame.frameScore = score;
+    }
   }
 
   get finalScore() {
     this.updateFrameScores();
-    const finalFrameIndex = this._frames.map(frame => frame.frameNumber).indexOf(10);
-    return this._frames[finalFrameIndex].frameScore;
-  }
-
-  get bowlerId() {
-    return this._bowlerId;
-  }
-
-  get bowlerName() {
-    return this._bowlerName;
-  }
-
-  get bowlerColor() {
-    return this._bowlerColor;
-  }
-
-  get frames() {
-    return this._frames;
+    const finalFrame = this._frames.find(frame => frame.frameNumber === 10);
+    return finalFrame.frameScore;
   }
 }

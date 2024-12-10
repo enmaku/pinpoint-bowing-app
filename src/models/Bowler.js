@@ -1,9 +1,10 @@
 export default class Bowler {
-  constructor() {
-    this._id = 'bowler_' + Math.random().toString(16).slice(2);
+  constructor(id = null) {
+    this._id = id || 'bowler_' + Math.random().toString(16).slice(2);
     this._name = '';
     this._games = [];
     this._color = 'red';
+    this._skill = 0.5;
   }
 
   addGame(id) {
@@ -37,5 +38,13 @@ export default class Bowler {
 
   get games() {
     return this._games;
+  }
+
+  get skill() {
+    return this._skill;
+  }
+
+  set skill(value) {
+    this._skill = value;
   }
 }

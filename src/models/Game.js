@@ -1,26 +1,35 @@
-import ScoreCard from "./ScoreCard";
+import ScoreCard from './ScoreCard';
 
 export default class Game {
   constructor() {
     this._id = 'game_' + Math.random().toString(16).slice(2);
     this._name = 'New Game';
-    this._bowlers = [];
-    this._scoreCards = [];
+    this._bowlerIds = [];
+    this._scorecards = [];
     this._timestamp = new Date().toLocaleString();
   }
 
   addBowler(bowler) {
-    this._bowlers.push(bowler.id);
-    this._scoreCards.push(new ScoreCard(bowler));
+    this._bowlerIds.push(bowler.id);
+    const scorecard = new ScoreCard(bowler);
+    this._scorecards.push(scorecard);
+    return scorecard;
   }
 
   removeBowler(id) {
-    const index = this._bowlers.map(bowler => bowler.id).indexOf(id);
-    ~index && this._bowlers.splice(index, 1);
+    const index = this._bowlerIds.indexOf(id);
+    if (index !== -1) {
+      this._bowlerIds.splice(index, 1);
+      this._scorecards.splice(index, 1);
+    }
   }
 
   get id() {
     return this._id;
+  }
+
+  set id(value) {
+    this._id = value;
   }
 
   get timestamp() {
@@ -31,15 +40,15 @@ export default class Game {
     return this._name;
   }
 
-  set name(name) {
-    this._name = name;
+  set name(value) {
+    this._name = value;
   }
 
-  get bowlers() {
-    return this._bowlers;
+  get bowlerIds() {
+    return this._bowlerIds;
   }
 
-  get scoreCards() {
-    return this._scoreCards;
+  get scorecards() {
+    return this._scorecards;
   }
 }
