@@ -40,42 +40,43 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import EssentialLink from 'components/EssentialLink.vue'
+import { ref } from 'vue';
+import EssentialLink from 'components/EssentialLink.vue';
 import { mapBowlingAlley } from 'quasar-extras-svg-icons/map-icons';
 
 defineOptions({
   name: 'MainLayout'
-})
+});
 
 const linksList = [
   {
     title: 'User Profile',
-    icon: 'person'
+    icon: 'person',
+    link: '/profile'
   },
   {
     title: 'Games',
     //caption: 'quasar.dev',
     icon: mapBowlingAlley,
-    //link: 'https://quasar.dev'
+    link: '/'
   },
   {
-    title: 'Friends',
+    title: 'Bowlers',
     //caption: 'github.com/quasarframework',
     icon: 'people',
-    //link: 'https://github.com/quasarframework'
+    link: '/bowlers'
   },
   {
     title: 'Statistics',
     //caption: 'chat.quasar.dev',
     icon: 'analytics',
-    //link: 'https://chat.quasar.dev'
+    link: '/stats'
   }
-]
+];
 
-const leftDrawerOpen = ref(false)
+const leftDrawerOpen = ref(false);
 
 function toggleLeftDrawer () {
-  leftDrawerOpen.value = !leftDrawerOpen.value
+  leftDrawerOpen.value = !leftDrawerOpen.value;
 }
 </script>

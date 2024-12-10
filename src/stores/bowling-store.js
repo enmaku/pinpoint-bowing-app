@@ -23,13 +23,32 @@ export const useBowlingStore = defineStore('bowling', {
     getBowlersInCurrentGame: state => {
       if (!state.currentGame) return [];
       return state.currentGame.bowlerIds.map(id => state.getBowlerById(id));
+    },
+    getBowlerGamesCount: state => bowlerId => {
+      return state.games.filter(game => game._bowlerIds.includes(bowlerId)).length;
+    },
+    getBowlerAverageScore: state => bowlerId => {
+      const bowlerGames = state.games
+        .filter(game => game._bowlerIds.includes(bowlerId))
+        .sort((a, b) => new Date(b._timestamp) - new Date(a._timestamp));
+
+      const recentGames = bowlerGames.slice(0, 12);
+      const scores = recentGames.map(game => {
+        const scorecard = game._scorecards.find(sc => sc._bowlerId === bowlerId);
+        return scorecard ? scorecard.finalScore : 0;
+      });
+      const validScores = scores.filter(score => score > 0);
+      const totalScore = validScores.reduce((acc, score) => acc + score, 0);
+      return validScores.length > 0 ? Number((totalScore / validScores.length).toFixed(2)) : 0;
     }
   },
 
   actions: {
     addBowler(name, id = null) {
-      const bowler = new Bowler(id);
+      const bowler = new Bowler(id || `bowler_${Date.now()}`);
       bowler.name = name;
+      bowler.color = 'primary';
+      bowler.skill = 0.7;
       this.bowlers.push(bowler);
       this.saveState();
       return bowler;
@@ -101,7 +120,7 @@ export const useBowlingStore = defineStore('bowling', {
             const game = new Game();
             game._id = gameData._id;
             game._name = gameData._name;
-            game._bowlerIds = gameData._bowlerIds || []; 
+            game._bowlerIds = gameData._bowlerIds || [];
             game._timestamp = gameData._timestamp;
 
             // Only create score cards if they don't exist in saved state

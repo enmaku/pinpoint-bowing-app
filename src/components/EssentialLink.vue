@@ -1,9 +1,11 @@
 <template>
   <q-item
     clickable
-    tag="a"
-    target="_blank"
-    :href="props.link"
+    tag="router-link"
+    :to="props.link"
+    :exact="true"
+    class="text-primary"
+    active-class="bg-primary text-white"
   >
     <q-item-section>
       <q-item-label><q-icon :name="props.icon" size="sm" class="q-pr-sm" />{{ props.title }}</q-item-label>
@@ -15,7 +17,7 @@
 <script setup>
 defineOptions({
   name: 'EssentialLink'
-})
+});
 
 const props = defineProps({
   title: {
@@ -30,12 +32,12 @@ const props = defineProps({
 
   link: {
     type: String,
-    default: '#'
+    default: '/'
   },
 
   icon: {
     type: String,
     default: ''
   }
-})
+});
 </script>

@@ -45,7 +45,7 @@ module.exports = {
     'prefer-const': ['error', { 'destructuring': 'all' }],  // Use const when possible
 
     // Comments
-    'spaced-comment': ['error', 'always'],  // Space after comment slashes
+    'spaced-comment': 0,  // Space after comment slashes
 
     // Allow certain patterns you use
     'no-mixed-operators': 'off',  // You use mixed operators in math calculations

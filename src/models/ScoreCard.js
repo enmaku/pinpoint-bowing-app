@@ -5,6 +5,8 @@ export default class ScoreCard {
     this._bowlerId = bowler.id;
     this._bowlerName = bowler.name;
     this._bowlerColor = bowler.color;
+    this._scores = {};
+    this.scores = this._scores;
     this._frames = [
       new Frame(1, 2), new Frame(2, 2), new Frame(3, 2), new Frame(4, 2), new Frame(5, 2),
       new Frame(6, 2), new Frame(7, 2), new Frame(8, 2), new Frame(9, 2), new Frame(10, 3)
@@ -15,6 +17,8 @@ export default class ScoreCard {
   get bowlerName() { return this._bowlerName; }
   get bowlerColor() { return this._bowlerColor; }
   get frames() { return this._frames; }
+  get scores() { return this._scores; }
+  set scores(value) { this._scores = value; }
 
   getCurrentFrame() {
     for (const frame of this._frames) {
