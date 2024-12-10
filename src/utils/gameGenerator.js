@@ -1,3 +1,4 @@
+import Roll from 'src/models/Roll';
 import { useBowlingStore } from 'src/stores/bowling-store';
 
 // Pin layout (triangle formation):
@@ -6,77 +7,33 @@ import { useBowlingStore } from 'src/stores/bowling-store';
 //      2 3
 //       1
 
-// Pin positions in a normalized 2D space (0-1 range)
+// Pin positions for visualization
 const PIN_POSITIONS = [
-  { x: 0.5, y: 0.85 },   // Pin 1
-  { x: 0.4, y: 0.7 },    // Pin 2
-  { x: 0.6, y: 0.7 },    // Pin 3
-  { x: 0.3, y: 0.55 },   // Pin 4
-  { x: 0.5, y: 0.55 },   // Pin 5
-  { x: 0.7, y: 0.55 },   // Pin 6
-  { x: 0.2, y: 0.4 },    // Pin 7
-  { x: 0.4, y: 0.4 },    // Pin 8
-  { x: 0.6, y: 0.4 },    // Pin 9
-  { x: 0.8, y: 0.4 }     // Pin 10
+  { x: 0, y: 0 },     // Pin 1
+  { x: -0.5, y: 1 },  // Pin 2
+  { x: 0.5, y: 1 },   // Pin 3
+  { x: -1, y: 2 },    // Pin 4
+  { x: 0, y: 2 },     // Pin 5
+  { x: 1, y: 2 },     // Pin 6
+  { x: -1.5, y: 3 },  // Pin 7
+  { x: -0.5, y: 3 },  // Pin 8
+  { x: 0.5, y: 3 },   // Pin 9
+  { x: 1.5, y: 3 }    // Pin 10
 ];
 
-// Pin adjacency matrix - each pin's index (1-based) maps to array of adjacent pin indices
-const PIN_ADJACENCY = {
-  1: [2, 3],
-  2: [1, 4, 5],
-  3: [1, 5, 6],
-  4: [2, 7, 8],
-  5: [2, 3, 8, 9],
-  6: [3, 9, 10],
-  7: [4],
-  8: [4, 5],
-  9: [5, 6],
-  10: [6]
-};
-
-// Convert 0/1 array to proper pin indices (1-based)
-function pinArrayToIndices(pinArray) {
-  return pinArray
-    .map((value, index) => value === 1 ? index + 1 : null)
-    .filter(index => index !== null);
-}
-
+// Count the number of pins down in a pin configuration
 function countPinsDown(pinData) {
-  // Count pins that are 0 (knocked down)
-  return pinData.reduce((count, pin) => count + (pin === 0 ? 1 : 0), 0);
+  return pinData.filter(pin => pin === 0).length;
 }
 
-function generatePinData(pinsDown, skill) {
-  // Keep trying until we get a valid configuration with the correct number of pins down
-  let attempts = 0;
-  let pinData;
-
-  do {
-    pinData = generatePinConfiguration(pinsDown, skill);
-    attempts++;
-  } while (countPinsDown(pinData.pinData) !== pinsDown && attempts < 10);
-
-  // If we couldn't generate a valid configuration, fall back to a simple one
-  if (countPinsDown(pinData.pinData) !== pinsDown) {
-    pinData = {
-      pinData: Array(10).fill(1),
-      knockedDownPositions: []
-    };
-    for (let i = 0; i < pinsDown; i++) {
-      pinData.pinData[i] = 0;
-      pinData.knockedDownPositions.push(PIN_POSITIONS[i]);
-    }
-  }
-
-  return pinData;
-}
-
+// Calculate distance between two points
 function calculateDistance(pos1, pos2) {
   const dx = pos1.x - pos2.x;
   const dy = pos1.y - pos2.y;
   return Math.sqrt(dx * dx + dy * dy);
 }
 
+// Generate a pin configuration with the specified number of pins down
 function generatePinConfiguration(pinsDown, skill) {
   const pinData = Array(10).fill(1); // Start with all pins up
 
@@ -151,165 +108,85 @@ function generatePinConfiguration(pinsDown, skill) {
   return { pinData, knockedDownPositions };
 }
 
-function isSplit(pinData) {
-  // Convert to 1-based indices of standing pins
-  const standingPins = pinArrayToIndices(pinData);
-
-  // Basic split requirements:
-  // 1. Headpin (pin 1) must be down
-  if (pinData[0] === 1) return false;
-
-  // 2. Need at least 2 standing pins
-  if (standingPins.length < 2) return false;
-
-  // 3. Total pins down must be between 2 and 8
-  const pinsDown = countPinsDown(pinData);
-  if (pinsDown < 2 || pinsDown > 8) return false;
-
-  // Check if standing pins are separated by at least one downed pin
-  for (let i = 0; i < standingPins.length; i++) {
-    for (let j = i + 1; j < standingPins.length; j++) {
-      const pin1 = standingPins[i];
-      const pin2 = standingPins[j];
-
-      // Check if these pins are connected through any path of standing pins
-      const visited = new Set();
-      const stack = [pin1];
-
-      while (stack.length > 0) {
-        const currentPin = stack.pop();
-        if (currentPin === pin2) {
-          // Found a path of standing pins - not a split
-          return false;
-        }
-
-        visited.add(currentPin);
-
-        // Add all standing adjacent pins that haven't been visited
-        const adjacentPins = PIN_ADJACENCY[currentPin] || [];
-        for (const adjPin of adjacentPins) {
-          if (!visited.has(adjPin) && pinData[adjPin - 1] === 1) {
-            stack.push(adjPin);
-          }
-        }
-      }
-    }
-  }
-
-  return true;
-}
-
+// Generate a random frame with realistic pin knockdowns
 function generateRandomFrame(skill, isLastFrame = false) {
-  // First roll: weighted by skill level
-  let firstRoll;
-  if (skill >= 0.8) {  // For highly skilled players (Alice and Brian)
-    // Generate numbers 0-10 with heavy bias towards 7-10
+  // First roll
+  const firstRoll = new Roll(0);
+  let remainingPins = 10;
+
+  // For highly skilled players (skill >= 0.8):
+  // 40% chance of strike
+  // 45% chance of 7-9 pins
+  // 15% chance of 3-6 pins
+  let pinsDown;
+  if (skill >= 0.8) {
     const rand = Math.random();
-    if (rand < 0.4) {  // 40% chance of strike
-      firstRoll = 10;
-    } else if (rand < 0.85) {  // 45% chance of 7-9 pins
-      firstRoll = 7 + Math.floor(Math.random() * 3);
-    } else {  // 15% chance of 3-6 pins
-      firstRoll = 3 + Math.floor(Math.random() * 4);
+    if (rand < 0.4) {
+      pinsDown = 10;
+    } else if (rand < 0.85) {
+      pinsDown = 7 + Math.floor(Math.random() * 3);
+    } else {
+      pinsDown = 3 + Math.floor(Math.random() * 4);
     }
-  } else if (skill >= 0.5) {  // For intermediate players (Charlie)
+  }
+  // For intermediate players (skill >= 0.5):
+  // 25% chance of strike
+  // 35% chance of 7-9 pins
+  // 30% chance of 4-6 pins
+  // 10% chance of 0-3 pins
+  else if (skill >= 0.5) {
     const rand = Math.random();
-    if (rand < 0.25) {  // 25% chance of strike
-      firstRoll = 10;
-    } else if (rand < 0.6) {  // 35% chance of 7-9 pins
-      firstRoll = 7 + Math.floor(Math.random() * 3);
-    } else if (rand < 0.9) {  // 30% chance of 4-6 pins
-      firstRoll = 4 + Math.floor(Math.random() * 3);
-    } else {  // 10% chance of 0-3 pins
-      firstRoll = Math.floor(Math.random() * 4);
+    if (rand < 0.25) {
+      pinsDown = 10;
+    } else if (rand < 0.6) {
+      pinsDown = 7 + Math.floor(Math.random() * 3);
+    } else if (rand < 0.9) {
+      pinsDown = 4 + Math.floor(Math.random() * 3);
+    } else {
+      pinsDown = Math.floor(Math.random() * 4);
     }
-  } else {  // For beginners (Diana, Ethan, Fiona)
-    // Use original random distribution but weighted by skill
-    firstRoll = Math.floor(Math.random() * 11 * (0.3 + skill * 0.7));
+  }
+  // For beginners:
+  // Random number of pins weighted by skill
+  else {
+    pinsDown = Math.floor(Math.random() * 11 * (0.3 + skill * 0.7));
   }
 
-  const firstPinData = generatePinData(firstRoll, skill);
-  const firstRollSplit = isSplit(firstPinData.pinData);
+  const firstPinData = generatePinConfiguration(pinsDown, skill);
+  firstRoll.pinData = firstPinData.pinData;
+  remainingPins -= pinsDown;
 
-  if (firstRoll === 10) { // Strike
-    if (isLastFrame) {
-      // In 10th frame after a strike, get two more rolls
-      const secondRoll = Math.floor(Math.random() * 11 * (0.5 + skill * 0.5));
-      const secondPinData = generatePinData(secondRoll, skill);
-      const secondRollSplit = false;
+  // Second roll (if not a strike, or if it's the last frame)
+  const rolls = [firstRoll];
+  if (remainingPins > 0 || (isLastFrame && pinsDown === 10)) {
+    const secondRoll = new Roll(1);
 
-      const thirdRoll = secondRoll === 10 ?
-        Math.floor(Math.random() * 11 * (0.5 + skill * 0.5)) :
-        Math.floor(Math.random() * (11 - secondRoll) * (0.5 + skill * 0.5));
-      const thirdPinData = generatePinData(thirdRoll, skill);
-      const thirdRollSplit = false;
-
-      return {
-        rolls: [firstRoll, secondRoll, thirdRoll],
-        pinData: [firstPinData, secondPinData, thirdPinData],
-        splits: [firstRollSplit, secondRollSplit, thirdRollSplit]
-      };
+    // Calculate pins down for second roll
+    if (remainingPins > 0) {
+      // More likely to get remaining pins based on skill
+      const probability = 0.3 + skill * 0.7;
+      pinsDown = Math.random() < probability ? remainingPins : Math.floor(Math.random() * remainingPins);
+    } else {
+      // Fresh rack after a strike in the 10th frame
+      pinsDown = Math.floor(Math.random() * 11 * (0.3 + skill * 0.7));
     }
-    // For non-10th frames, only return the strike roll
-    return {
-      rolls: [firstRoll],
-      pinData: [firstPinData],
-      splits: [firstRollSplit]
-    };
+
+    const secondPinData = generatePinConfiguration(pinsDown, skill);
+    secondRoll.pinData = secondPinData.pinData;
+    remainingPins = 10 - pinsDown;
+    rolls.push(secondRoll);
+
+    // Third roll in the last frame
+    if (isLastFrame && (firstRoll.strike || secondRoll.spare)) {
+      const thirdRoll = new Roll(2);
+      pinsDown = Math.floor(Math.random() * 11 * (0.3 + skill * 0.7));
+      const thirdPinData = generatePinConfiguration(pinsDown, skill);
+      thirdRoll.pinData = thirdPinData.pinData;
+      rolls.push(thirdRoll);
+    }
   }
 
-  // Second roll: Chance of spare depends on skill and whether it's a split
-  const remainingPins = 10 - firstRoll;
-  let spareChance;
-
-  if (firstRollSplit) {
-    // Splits are much harder to convert, especially for less skilled players
-    // Skill^3 makes the effect more pronounced - low skill players rarely convert splits
-    spareChance = Math.pow(skill, 3);
-  } else {
-    // Regular spares are easier but still affected by skill
-    // Skill^2 makes it moderately harder for low skill players
-    spareChance = Math.pow(skill, 2);
-  }
-
-  // Determine if they convert the spare based on skill-adjusted probability
-  const convertsSpare = Math.random() < spareChance;
-  const secondRoll = convertsSpare ? remainingPins :
-    Math.floor(Math.random() * remainingPins * (0.3 + skill * 0.4)); // If they miss, still affected by skill
-
-  // Generate pin data for second roll based on remaining standing pins
-  const secondPinData = {
-    pinData: firstPinData.pinData.map((pin, index) => {
-      if (pin === 0) return 0; // Already knocked down pins stay down
-      return generatePinData(secondRoll, skill).pinData[index]; // Only consider still-standing pins
-    }),
-    knockedDownPositions: []
-  };
-
-  secondPinData.knockedDownPositions = secondPinData.pinData.map((pin, index) => {
-    if (pin === 0) return PIN_POSITIONS[index];
-  }).filter(pos => pos !== undefined);
-
-  const secondRollSplit = false;
-
-  if (isLastFrame && firstRoll + secondRoll === 10) { // Spare in 10th frame
-    // Bonus ball after spare - skill affects this too
-    const thirdRoll = Math.floor(Math.random() * 11 * (0.5 + skill * 0.5));
-    const thirdPinData = generatePinData(thirdRoll, skill);
-    const thirdRollSplit = false;
-
-    return {
-      rolls: [firstRoll, secondRoll, thirdRoll],
-      pinData: [firstPinData, secondPinData, thirdPinData],
-      splits: [firstRollSplit, secondRollSplit, thirdRollSplit]
-    };
-  }
-
-  return {
-    rolls: [firstRoll, secondRoll],
-    pinData: [firstPinData, secondPinData],
-    splits: [firstRollSplit, secondRollSplit]
-  };
+  return rolls;
 }
 
 // List of fixed bowlers with preset skill levels and IDs
@@ -377,8 +254,8 @@ export function generateRandomGame() {
     // Generate 10 frames
     for (let frame = 1; frame <= 10; frame++) {
       const frameData = generateRandomFrame(skill, frame === 10);
-      frameData.rolls.forEach((pins, rollIndex) => {
-        scoreCard.setScore(frame, rollIndex + 1, pins, frameData.pinData[rollIndex].pinData, frameData.splits[rollIndex]);
+      frameData.forEach((roll, rollIndex) => {
+        scoreCard.setScore(frame, rollIndex + 1, countPinsDown(roll.pinData), roll.pinData);
       });
     }
   });
