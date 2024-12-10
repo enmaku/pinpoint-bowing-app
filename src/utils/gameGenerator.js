@@ -1,9 +1,5 @@
 import { useBowlingStore } from 'src/stores/bowling-store';
 
-const colors = ['red', 'green', 'blue', 'purple', 'orange', 'teal',
-              'pink', 'indigo', 'cyan', 'deep-purple', 'light-blue', 'deep-orange',
-              'lime', 'brown', 'amber', 'yellow', 'light-green', 'blue-grey'];
-
 // Pin layout (triangle formation):
 //    7 8 9 10
 //     4 5 6
@@ -317,18 +313,13 @@ function generateRandomFrame(skill, isLastFrame = false) {
 }
 
 // List of fixed bowlers with preset skill levels and IDs
-// - Alice and Bob are our pros (naturally, as they're the most experienced in the protocol)
-// - Carol is our intermediate bowler
-// - Dave is learning but getting there
-// - Eve is still a beginner (too busy eavesdropping to practice)
-// - And Mallory is our novice (probably because they spend all their time trying to modify the scorecard!)
 const bowlers = [
-  { id: 'bowler_alice', name: 'Alice', skill: 0.9 },   // Pro - The originator
-  { id: 'bowler_bob', name: 'Bob', skill: 0.8 },       // Pro - The recipient
-  { id: 'bowler_carol', name: 'Carol', skill: 0.6 },   // Intermediate - The third participant
-  { id: 'bowler_dave', name: 'Dave', skill: 0.4 },     // Beginner - The fourth participant
-  { id: 'bowler_eve', name: 'Eve', skill: 0.2 },       // Beginner - The eavesdropper
-  { id: 'bowler_mallory', name: 'Mallory', skill: 0.0 } // Novice - The malicious attacker
+  { id: 'bowler_alice', name: 'Alice', skill: 0.9, color: 'blue' },      // Pro - The originator
+  { id: 'bowler_bob', name: 'Bob', skill: 0.8, color: 'red' },           // Pro - The recipient
+  { id: 'bowler_carol', name: 'Carol', skill: 0.6, color: 'green' },     // Intermediate - The third participant
+  { id: 'bowler_dave', name: 'Dave', skill: 0.4, color: 'orange' },      // Beginner - The fourth participant
+  { id: 'bowler_eve', name: 'Eve', skill: 0.2, color: 'purple' },        // Beginner - The eavesdropper
+  { id: 'bowler_mallory', name: 'Mallory', skill: 0.0, color: 'brown' }  // Novice - The malicious attacker
 ];
 
 // List of fictional bowling alleys
@@ -356,12 +347,12 @@ export function generateRandomGame() {
     if (!existingBowler) {
       existingBowler = store.addBowler(bowler.name, bowler.id);
       existingBowler.skill = bowler.skill;
+      existingBowler.color = bowler.color;
     }
   });
 
   // Generate 2-4 random bowlers
   const numBowlers = Math.floor(Math.random() * 3) + 2;
-  const availableColors = [...colors];
   const availableBowlers = [...bowlers];
 
   const bowlersInGame = [];
@@ -372,11 +363,6 @@ export function generateRandomGame() {
 
     // Get the existing bowler from the store
     const bowler = store.getBowlerById(selectedBowler.id);
-
-    // Randomly select a color and remove it from available colors
-    const colorIndex = Math.floor(Math.random() * availableColors.length);
-    bowler.color = availableColors.splice(colorIndex, 1)[0];
-
     bowlersInGame.push(bowler);
   }
 
