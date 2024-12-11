@@ -50,28 +50,35 @@ defineOptions({
 
 const linksList = [
   {
-    title: 'User Profile',
-    icon: 'person',
-    link: '/profile'
+    title: 'Home',
+    icon: 'home',
+    link: '/'
   },
+  // Will be implemented later
+  // {
+  //   title: 'User Profile',
+  //   icon: 'person',
+  //   link: '/profile'
+  // },
   {
     title: 'Games',
     //caption: 'quasar.dev',
     icon: mapBowlingAlley,
-    link: '/'
+    link: '/games/'
   },
   {
     title: 'Bowlers',
     //caption: 'github.com/quasarframework',
     icon: 'people',
     link: '/bowlers'
-  },
-  {
-    title: 'Statistics',
-    //caption: 'chat.quasar.dev',
-    icon: 'analytics',
-    link: '/stats'
   }
+  // Will be implemented later
+  //{
+  //  title: 'Statistics',
+  //  //caption: 'chat.quasar.dev',
+  //  icon: 'analytics',
+  //  link: '/stats'
+  //}
 ];
 
 const leftDrawerOpen = ref(false);
