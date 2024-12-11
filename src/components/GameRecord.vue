@@ -4,7 +4,7 @@
         <div class="game-record">
           <div class="game-header">
             <div class="game-title">{{ game._name }}</div>
-            <div class="game-timestamp">{{ game._timestamp }}</div>
+            <div class="game-timestamp">{{ formattedTimestamp }}</div>
           </div>
         </div>
       </q-card-section>
@@ -17,28 +17,34 @@
     </q-card>
 </template>
 
-<script>
-import { defineComponent } from 'vue';
+<script setup>
+import { computed } from 'vue';
 import ScoreCardRecord from './ScoreCardRecord.vue';
 
-export default defineComponent({
-  name: 'GameRecord',
-  components: {
-    ScoreCardRecord
-  },
-  props: {
-    game: {
-      type: Object,
-      required: true,
-      validator: function(value) {
-        return value && 
-               typeof value._id === 'string' && 
-               typeof value._name === 'string' &&
-               Array.isArray(value._bowlerIds) &&
-               Array.isArray(value._scorecards);
-      }
+const props = defineProps({
+  game: {
+    type: Object,
+    required: true,
+    validator: function(value) {
+      return value &&
+             typeof value._id === 'string' &&
+             typeof value._name === 'string' &&
+             Array.isArray(value._bowlerIds) &&
+             Array.isArray(value._scorecards);
     }
   }
+});
+
+const formattedTimestamp = computed(() => {
+  const date = new Date(props.game._timestamp);
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'numeric',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  }).format(date);
 });
 </script>
 
@@ -55,13 +61,12 @@ export default defineComponent({
 }
 
 .game-title {
-  font-size: 1.2em;
   font-weight: bold;
-  color: #2c3e50;
+  font-size: 1.1em;
 }
 
 .game-timestamp {
-  font-size: 0.9em;
   color: #666;
+  font-size: 0.9em;
 }
 </style>

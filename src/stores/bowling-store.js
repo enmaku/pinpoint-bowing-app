@@ -12,17 +12,17 @@ export const useBowlingStore = defineStore('bowling', {
 
   getters: {
     getBowlerById: state => id => {
-      return state.bowlers.find(bowler => bowler.id === id);
+      return state.bowlers.find(bowler => bowler._id === id);
     },
     getGameById: state => id => {
-      return state.games.find(game => game.id === id);
+      return state.games.find(game => game._id === id);
     },
     getCurrentGame: state => {
       return state.currentGame;
     },
     getBowlersInCurrentGame: state => {
       if (!state.currentGame) return [];
-      return state.currentGame.bowlerIds.map(id => state.getBowlerById(id));
+      return state.currentGame._bowlerIds.map(id => state.getBowlerById(id));
     },
     getBowlerGamesCount: state => bowlerId => {
       return state.games.filter(game => game._bowlerIds.includes(bowlerId)).length;
@@ -55,8 +55,27 @@ export const useBowlingStore = defineStore('bowling', {
     },
 
     removeBowler(id) {
-      const index = this.bowlers.findIndex(bowler => bowler.id === id);
+      console.log('Store: Removing bowler with ID:', id);
+      console.log('Current bowlers:', this.bowlers);
+      const index = this.bowlers.findIndex(bowler => bowler._id === id);
+      console.log('Found index:', index);
       if (~index) {
+        console.log('Removing bowler at index:', index);
+        // Remove bowler from all games
+        this.games.forEach(game => {
+          // Remove bowler's scorecards
+          game._scorecards = game._scorecards.filter(sc => sc._bowlerId !== id);
+          // Remove bowler from bowlerIds
+          game._bowlerIds = game._bowlerIds.filter(bid => bid !== id);
+        });
+        
+        // Remove bowler from current game if exists
+        if (this.currentGame) {
+          this.currentGame._scorecards = this.currentGame._scorecards.filter(sc => sc._bowlerId !== id);
+          this.currentGame._bowlerIds = this.currentGame._bowlerIds.filter(bid => bid !== id);
+        }
+        
+        // Remove the bowler
         this.bowlers.splice(index, 1);
         this.saveState();
       }

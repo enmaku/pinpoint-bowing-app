@@ -6,7 +6,7 @@ export default class Game {
     this._name = 'New Game';
     this._bowlerIds = [];
     this._scorecards = [];
-    this._timestamp = new Date().toLocaleString();
+    this._timestamp = new Date();
   }
 
   addBowler(bowler) {

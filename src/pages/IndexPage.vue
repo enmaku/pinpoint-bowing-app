@@ -61,7 +61,10 @@ import { generateSampleGame } from 'src/utils/gameGenerator';
 
 const store = useBowlingStore();
 
-const games = computed(() => store.games);
+const games = computed(() => {
+  return [...store.games].sort((a, b) => new Date(b._timestamp) - new Date(a._timestamp));
+});
+
 const hasData = computed(() => store.bowlers.length > 0 || store.games.length > 0);
 
 const showDialog = ref(false);
