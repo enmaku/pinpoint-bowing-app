@@ -68,13 +68,13 @@ export const useBowlingStore = defineStore('bowling', {
           // Remove bowler from bowlerIds
           game._bowlerIds = game._bowlerIds.filter(bid => bid !== id);
         });
-        
+
         // Remove bowler from current game if exists
         if (this.currentGame) {
           this.currentGame._scorecards = this.currentGame._scorecards.filter(sc => sc._bowlerId !== id);
           this.currentGame._bowlerIds = this.currentGame._bowlerIds.filter(bid => bid !== id);
         }
-        
+
         // Remove the bowler
         this.bowlers.splice(index, 1);
         this.saveState();

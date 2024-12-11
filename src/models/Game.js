@@ -10,7 +10,7 @@ export default class Game {
   }
 
   addBowler(bowler) {
-    this._bowlerIds.push(bowler.id);
+    this._bowlerIds.push(bowler._id);
     const scorecard = new ScoreCard(bowler);
     this._scorecards.push(scorecard);
     return scorecard;

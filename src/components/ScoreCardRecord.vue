@@ -10,8 +10,7 @@
             {{ roll.strike ? 'X' :
                roll.spare ? '/' :
                roll.foul ? 'F' :
-               roll.pins === null ? '' :
-               roll.pins === 0 ? '-' :
+               !roll.pins ? '-' :
                roll.split ? String.fromCharCode(9311 + roll.pins) :
                roll.pins }}
           </div>

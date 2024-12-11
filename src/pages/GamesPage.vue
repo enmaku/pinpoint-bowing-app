@@ -37,6 +37,12 @@
       <q-fab icon="add" direction="up" color="primary">
         <q-fab-action
           color="primary"
+          @click="router.push('/games/create')"
+          icon="sports_score"
+          label="Create New Game"
+        />
+        <q-fab-action
+          color="primary"
           @click="showDialog = true"
           icon="casino"
           label="Generate Sample Games"
@@ -54,12 +60,16 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import GameRecord from 'src/components/GameRecord.vue';
 import { useBowlingStore } from 'src/stores/bowling-store';
 import { generateSampleGame } from 'src/utils/gameGenerator';
 
+const router = useRouter();
 const store = useBowlingStore();
+const showDialog = ref(false);
+const numGames = ref(1);
 
 const games = computed(() => {
   return [...store.games].sort((a, b) => new Date(b._timestamp) - new Date(a._timestamp));
@@ -67,12 +77,10 @@ const games = computed(() => {
 
 const hasData = computed(() => store.bowlers.length > 0 || store.games.length > 0);
 
-const showDialog = ref(false);
-const numGames = ref(1);
-
 function generateGames() {
-  if (numGames.value > 0) {
-    for (let i = 0; i < numGames.value; i++) {
+  const count = parseInt(numGames.value);
+  if (count > 0) {
+    for (let i = 0; i < count; i++) {
       generateSampleGame(store);
     }
     numGames.value = 1;
