@@ -36,21 +36,25 @@
 
       <!-- Bowler Selection -->
       <q-select
+        ref="bowlerSelect"
         v-model="selectedBowlers"
-        :options="bowlerOptions"
+        :options="filteredBowlerOptions"
         label="Select Bowlers"
         filled
         multiple
         use-chips
+        use-input
+        input-debounce="0"
+        @filter="filterBowlers"
+        @new-value="onAddNewBowler"
+        @keyup.enter.prevent="onEnterPress"
+        new-value-mode="add-unique"
         :rules="[val => val.length > 0 || 'Please select at least one bowler']"
       >
-        <template v-slot:option="scope">
-          <q-item v-bind="scope.itemProps">
+        <template v-slot:no-option="{ inputValue }">
+          <q-item clickable v-close-popup @click="onAddNewBowler(inputValue)">
             <q-item-section>
-              <q-item-label>{{ scope.opt.label }}</q-item-label>
-              <q-item-label caption>
-                Average: {{ getBowlerAverageScore(scope.opt.value) }}
-              </q-item-label>
+              <q-item-label>Add "{{ inputValue || 'New Bowler' }}" as a new bowler</q-item-label>
             </q-item-section>
           </q-item>
         </template>
@@ -115,24 +119,83 @@ function setSeriesName(val) {
 
 // Bowler selection handling
 const selectedBowlers = ref([]);
+const filteredBowlerOptions = ref([]);
+const bowlerSelect = ref(null);
 
 const bowlerOptions = computed(() => {
   return store.bowlers.map(bowler => ({
     label: bowler._name,
-    value: bowler,
+    value: bowler
   }));
 });
+
+function filterBowlers(val, update) {
+  update(() => {
+    if (val === '') {
+      filteredBowlerOptions.value = bowlerOptions.value;
+    } else {
+      const needle = val.toLowerCase();
+      filteredBowlerOptions.value = store.bowlers
+        .filter(bowler => bowler._name.toLowerCase().indexOf(needle) > -1)
+        .map(bowler => ({
+          label: bowler._name,
+          value: bowler
+        }));
+    }
+  });
+}
+
+function onAddNewBowler(name) {
+  // Ensure name is a string and not empty
+  const bowlerName = String(name || '').trim();
+  if (!bowlerName) return;
+
+  // Check if bowler already exists
+  const existingBowler = store.bowlers.find(
+    bowler => bowler._name.toLowerCase() === bowlerName.toLowerCase()
+  );
+
+  if (existingBowler) {
+    // If bowler exists, just add to selection if not already selected
+    const alreadySelected = selectedBowlers.value.some(
+      selected => selected.value._id === existingBowler._id
+    );
+    if (!alreadySelected) {
+      selectedBowlers.value.push({
+        label: existingBowler._name,
+        value: existingBowler
+      });
+    }
+  } else {
+    // Create new bowler and add to selection
+    const newBowler = store.addBowler(bowlerName);
+    selectedBowlers.value.push({
+      label: newBowler._name,
+      value: newBowler
+    });
+  }
+}
 
 function getBowlerAverageScore(bowlerId) {
   const bowler = typeof bowlerId === 'string' ? store.getBowlerById(bowlerId) : bowlerId;
   return store.getBowlerAverageScore(bowler._id);
 }
 
+function onEnterPress(e) {
+  const input = e.target;
+  const value = input.value?.trim();
+  if (value) {
+    onAddNewBowler(value);
+    input.value = '';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+}
+
 async function onSubmit() {
   try {
     console.log('Selected bowlers:', selectedBowlers.value);
     const series = store.startNewSeries(
-      selectedBowlers.value,
+      selectedBowlers.value.map(bowler => bowler.value),
       seriesName.value || 'New Series',
       location.value
     );
