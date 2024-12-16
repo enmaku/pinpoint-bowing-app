@@ -1,7 +1,7 @@
 <template>
   <q-page class="q-pb-md">
     <div class="q-pa-none">
-      <div v-if="series.length > 0" class="q-pa-none">
+      <div v-if="series.length > 0" class="q-pa-none series-list">
         <div v-for="seriesItem in series" :key="seriesItem.id">
           <q-expansion-item
             group="series"
@@ -11,9 +11,9 @@
           >
             <template #header>
               <div class="column full-width series-header">
-                <div class="row items-center justify-between no-wrap">
-                  <div class="col-auto text-primary text-h6">{{ seriesItem._name }}</div>
-                  <div class="col-auto text-caption no-wrap">{{ formatDate(seriesItem._timestamp) }}</div>
+                <div class="row items-start justify-between no-wrap q-mb-xs">
+                  <div class="col text-primary text-h6">{{ seriesItem._name }}</div>
+                  <div class="col-auto text-caption no-wrap q-ml-sm" style="min-width: 85px; text-align: right">{{ formatDate(seriesItem._timestamp) }}</div>
                 </div>
                 <div class="row items-center q-gutter-x-xs">
                   <q-chip
@@ -153,7 +153,17 @@ function generateSeries() {
       store.addBowler('Dave', 'bowler_dave');
     }
 
-    for (let i = 0; i < seriesCount; i++) {
+    const locations = [
+      'Sunset Lanes',
+      'Golden Pin Bowl',
+      'Strike City',
+      'Starlight Bowling',
+      'Pacific Lanes',
+      'Lucky Strike'
+    ];
+
+    // Create series in reverse order so newer ones appear at the top
+    for (let i = seriesCount - 1; i >= 0; i--) {
       // Select 2-4 random bowlers for this series
       const numBowlers = Math.floor(Math.random() * 3) + 2;
       const availableBowlers = [...store.bowlers];
@@ -164,16 +174,39 @@ function generateSeries() {
         selectedBowlers.push(availableBowlers.splice(index, 1)[0]);
       }
 
+      // Calculate base timestamp for this series (days ago)
+      const daysAgo = i * (Math.floor(Math.random() * 3) + 1); // 1-3 days between series
+      const seriesDate = new Date(Date.now() - (daysAgo * 24 * 60 * 60 * 1000));
+      
+      // Generate series name from bowlers
+      const location = locations[Math.floor(Math.random() * locations.length)];
+      let seriesName;
+      if (selectedBowlers.length === 2) {
+        seriesName = `${selectedBowlers[0]._name} & ${selectedBowlers[1]._name}`;
+      } else if (selectedBowlers.length === 3) {
+        seriesName = `${selectedBowlers[0]._name}, ${selectedBowlers[1]._name} & ${selectedBowlers[2]._name}`;
+      } else {
+        seriesName = `${selectedBowlers[0]._name}, ${selectedBowlers[1]._name}, ${selectedBowlers[2]._name} & ${selectedBowlers[3]._name}`;
+      }
+      seriesName += ` at ${location}`;
+
       // Create the series with the selected bowlers
       const series = store.startNewSeries(
         selectedBowlers.map(b => b._id),
-        `Sample Series ${i + 1}`,
-        ['ABC Lanes', 'XYZ Bowl', 'Strike City'][Math.floor(Math.random() * 3)]
+        seriesName,
+        location
       );
 
-      // Generate additional games for this series
+      // Update series timestamp
+      store.series[store.series.length - 1]._timestamp = seriesDate.toISOString();
+
+      // Generate additional games for this series with realistic timestamps
+      const minutesPerGame = numBowlers * 12 + Math.floor(Math.random() * 10); // 12-15 mins per player
       for (let j = 0; j < gamesCount - 1; j++) {
         store.startNewGame(true);
+        // Set game timestamp to be after the previous game
+        const gameTime = new Date(seriesDate.getTime() + (j + 1) * minutesPerGame * 60 * 1000);
+        store.currentSeries._games[store.currentSeries._games.length - 1]._timestamp = gameTime;
       }
     }
 
@@ -188,6 +221,10 @@ onMounted(() => {
 </script>
 
 <style>
+.series-list {
+  padding-bottom: 80px;
+}
+
 .q-expansion-item {
   border-bottom: 1px solid #e0e0e0;
   border-radius: 0;

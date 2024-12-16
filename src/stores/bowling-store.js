@@ -33,6 +33,12 @@ export const useBowlingStore = defineStore('bowling', {
     getBowlerSeriesCount: state => bowlerId => {
       return state.series.filter(series => series._bowlerIds.includes(bowlerId)).length;
     },
+    getBowlerGamesCount: state => bowlerId => {
+      return state.series.reduce((count, series) => 
+        count + series.games.filter(game => 
+          game._scorecards.some(sc => sc._bowlerId === bowlerId)
+        ).length, 0);
+    },
     getBowlerAverageScore: state => bowlerId => {
       const allGames = state.series.flatMap(series => 
         series.games.filter(game => 
