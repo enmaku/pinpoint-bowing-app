@@ -2,7 +2,7 @@
   <q-page class="q-pa-md">
     <div class="text-h6 q-mb-md">Bowlers</div>
 
-    <div v-if="bowlers.length > 0">
+    <div v-if="bowlers.length > 0" class="bowlers-container">
       <q-list bordered separator>
         <BowlerRecord
           v-for="bowler in bowlers"
@@ -83,5 +83,10 @@ function addBowler() {
 .q-list {
   max-width: 600px;
   margin: 0 auto;
+}
+
+.bowlers-container {
+  /* Add padding at the bottom to account for FAB */
+  padding-bottom: 80px;
 }
 </style>
