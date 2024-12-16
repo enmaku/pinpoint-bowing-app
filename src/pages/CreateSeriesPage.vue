@@ -119,22 +119,24 @@ const selectedBowlers = ref([]);
 const bowlerOptions = computed(() => {
   return store.bowlers.map(bowler => ({
     label: bowler._name,
-    value: bowler._id
+    value: bowler,
   }));
 });
 
 function getBowlerAverageScore(bowlerId) {
-  return store.getBowlerAverageScore(bowlerId);
+  const bowler = typeof bowlerId === 'string' ? store.getBowlerById(bowlerId) : bowlerId;
+  return store.getBowlerAverageScore(bowler._id);
 }
 
 async function onSubmit() {
   try {
+    console.log('Selected bowlers:', selectedBowlers.value);
     const series = store.startNewSeries(
       selectedBowlers.value,
       seriesName.value || 'New Series',
       location.value
     );
-    
+
     if (series) {
       router.push('/series');
     }

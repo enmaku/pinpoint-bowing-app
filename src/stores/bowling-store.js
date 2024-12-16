@@ -99,13 +99,19 @@ export const useBowlingStore = defineStore('bowling', {
 
     startNewSeries(bowlerIds, name, location) {
       const series = new Series(name, location);
-      series._bowlerIds = bowlerIds;
+      // Handle both bowler objects and IDs
+      series._bowlerIds = bowlerIds.map(bowler => 
+        typeof bowler === 'string' ? bowler : 
+        bowler.value ? bowler.value._id : 
+        bowler._id
+      );
       this.series.push(series);
       this.currentSeries = series;
       
       // Start the first game
       this.startNewGame(true);
       
+      this.saveState();
       return series;
     },
 
@@ -119,7 +125,7 @@ export const useBowlingStore = defineStore('bowling', {
         const bowler = this.getBowlerById(bowlerId);
         if (bowler) {
           const scorecard = new ScoreCard({
-            id: bowler._id,
+            id: bowlerId,
             name: bowler._name,
             color: bowler._color || 'primary'
           });
