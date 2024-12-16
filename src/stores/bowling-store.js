@@ -108,8 +108,8 @@ export const useBowlingStore = defineStore('bowling', {
       this.series.push(series);
       this.currentSeries = series;
       
-      // Start the first game
-      this.startNewGame(true);
+      // Start the first game without generating scores
+      this.startNewGame(false);
       
       this.saveState();
       return series;
