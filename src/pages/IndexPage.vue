@@ -19,11 +19,11 @@
         flat
         dense
         class="nav-button"
-        to="/games/"
+        to="/series/"
       >
         <div class="row full-width items-center">
           <q-icon :name="mapBowlingAlley" size="24px" class="q-mr-md" />
-          <div class="text-h6">GAMES</div>
+          <div class="text-h6">SERIES</div>
         </div>
       </q-btn>
 

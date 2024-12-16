@@ -79,7 +79,7 @@
         <q-fab icon="add" direction="up" color="primary">
           <q-fab-action
             color="primary"
-            @click="router.push('/games/create')"
+            @click="router.push('/series/create')"
             icon="sports_score"
             label="Create New Series"
           />

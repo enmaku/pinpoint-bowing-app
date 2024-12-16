@@ -62,7 +62,7 @@
           label="Cancel"
           flat
           class="q-mr-sm"
-          to="/games/"
+          to="/series/"
         />
         <q-btn
           label="Create Series"
@@ -136,7 +136,7 @@ async function onSubmit() {
     );
     
     if (series) {
-      router.push('/games');
+      router.push('/series');
     }
   } catch (error) {
     console.error('Error creating series:', error);

@@ -61,10 +61,10 @@ const linksList = [
   //   link: '/profile'
   // },
   {
-    title: 'Games',
+    title: 'Series',
     //caption: 'quasar.dev',
     icon: mapBowlingAlley,
-    link: '/games/'
+    link: '/series/'
   },
   {
     title: 'Bowlers',
