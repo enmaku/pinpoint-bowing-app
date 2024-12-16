@@ -1,12 +1,15 @@
 import { defineStore } from 'pinia';
 import Bowler from '../models/Bowler';
 import Game from '../models/Game';
+import Series from '../models/Series';
 import ScoreCard from '../models/ScoreCard';
+import { generateRandomFrame, generateRandomGame } from '../utils/gameGenerator';
 
 export const useBowlingStore = defineStore('bowling', {
   state: () => ({
     bowlers: [],
-    games: [],
+    series: [],
+    currentSeries: null,
     currentGame: null
   }),
 
@@ -14,25 +17,30 @@ export const useBowlingStore = defineStore('bowling', {
     getBowlerById: state => id => {
       return state.bowlers.find(bowler => bowler._id === id);
     },
-    getGameById: state => id => {
-      return state.games.find(game => game._id === id);
+    getSeriesById: state => id => {
+      return state.series.find(series => series._id === id);
+    },
+    getCurrentSeries: state => {
+      return state.currentSeries;
     },
     getCurrentGame: state => {
       return state.currentGame;
     },
-    getBowlersInCurrentGame: state => {
-      if (!state.currentGame) return [];
-      return state.currentGame._bowlerIds.map(id => state.getBowlerById(id));
+    getBowlersInCurrentSeries: state => {
+      if (!state.currentSeries) return [];
+      return state.currentSeries._bowlerIds.map(id => state.getBowlerById(id));
     },
-    getBowlerGamesCount: state => bowlerId => {
-      return state.games.filter(game => game._bowlerIds.includes(bowlerId)).length;
+    getBowlerSeriesCount: state => bowlerId => {
+      return state.series.filter(series => series._bowlerIds.includes(bowlerId)).length;
     },
     getBowlerAverageScore: state => bowlerId => {
-      const bowlerGames = state.games
-        .filter(game => game._bowlerIds.includes(bowlerId))
-        .sort((a, b) => new Date(b._timestamp) - new Date(a._timestamp));
+      const allGames = state.series.flatMap(series => 
+        series.games.filter(game => 
+          game._scorecards.some(sc => sc._bowlerId === bowlerId)
+        )
+      ).sort((a, b) => new Date(b._timestamp) - new Date(a._timestamp));
 
-      const recentGames = bowlerGames.slice(0, 12);
+      const recentGames = allGames.slice(0, 12);
       const scores = recentGames.map(game => {
         const scorecard = game._scorecards.find(sc => sc._bowlerId === bowlerId);
         return scorecard ? scorecard.finalScore : 0;
@@ -47,7 +55,12 @@ export const useBowlingStore = defineStore('bowling', {
     addBowler(name, id = null) {
       const bowler = new Bowler(id || `bowler_${Date.now()}`);
       bowler.name = name;
-      bowler.color = 'primary';
+      bowler.color = {
+        'bowler_alice': 'red',
+        'bowler_bob': 'blue',
+        'bowler_carol': 'green',
+        'bowler_dave': 'orange'
+      }[id] || ['red', 'blue', 'green', 'orange', 'purple', 'cyan', 'pink', 'teal'][this.bowlers.length % 8];
       bowler.skill = 0.7;
       this.bowlers.push(bowler);
       this.saveState();
@@ -55,44 +68,66 @@ export const useBowlingStore = defineStore('bowling', {
     },
 
     removeBowler(id) {
-      console.log('Store: Removing bowler with ID:', id);
-      console.log('Current bowlers:', this.bowlers);
       const index = this.bowlers.findIndex(bowler => bowler._id === id);
-      console.log('Found index:', index);
       if (~index) {
-        console.log('Removing bowler at index:', index);
-        // Remove bowler from all games
-        this.games.forEach(game => {
-          // Remove bowler's scorecards
-          game._scorecards = game._scorecards.filter(sc => sc._bowlerId !== id);
-          // Remove bowler from bowlerIds
-          game._bowlerIds = game._bowlerIds.filter(bid => bid !== id);
+        // Remove bowler from all series
+        this.series.forEach(series => {
+          series.removeBowler(id);
+          series.games.forEach(game => {
+            game.removeScorecard(id);
+          });
         });
 
-        // Remove bowler from current game if exists
-        if (this.currentGame) {
-          this.currentGame._scorecards = this.currentGame._scorecards.filter(sc => sc._bowlerId !== id);
-          this.currentGame._bowlerIds = this.currentGame._bowlerIds.filter(bid => bid !== id);
+        // Remove bowler from current series/game if exists
+        if (this.currentSeries) {
+          this.currentSeries.removeBowler(id);
+          if (this.currentGame) {
+            this.currentGame.removeScorecard(id);
+          }
         }
 
-        // Remove the bowler
         this.bowlers.splice(index, 1);
         this.saveState();
       }
     },
 
-    startNewGame(bowlerIds, gameName = 'New Game') {
-      const game = new Game();
-      game.name = gameName;
-      bowlerIds.forEach(bowlerId => {
+    startNewSeries(bowlerIds, name, location) {
+      const series = new Series(name, location);
+      series._bowlerIds = bowlerIds;
+      this.series.push(series);
+      this.currentSeries = series;
+      
+      // Start the first game
+      this.startNewGame(true);
+      
+      return series;
+    },
+
+    startNewGame(generateScores = false) {
+      if (!this.currentSeries) return null;
+
+      const game = new Game(this.currentSeries._id);
+      
+      // Create scorecards for each bowler
+      this.currentSeries._bowlerIds.forEach(bowlerId => {
         const bowler = this.getBowlerById(bowlerId);
         if (bowler) {
-          game.addBowler(bowler);
+          const scorecard = new ScoreCard({
+            id: bowler._id,
+            name: bowler._name,
+            color: bowler._color || 'primary'
+          });
+          game._scorecards.push(scorecard);
         }
       });
-      this.games.push(game);
+
+      this.currentSeries._games.push(game);
       this.currentGame = game;
-      this.saveState();
+
+      if (generateScores) {
+        generateRandomGame(game, this);
+      }
+
       return game;
     },
 
@@ -103,17 +138,20 @@ export const useBowlingStore = defineStore('bowling', {
       }
     },
 
+    endCurrentSeries() {
+      if (this.currentSeries) {
+        this.currentGame = null;
+        this.currentSeries = null;
+        this.saveState();
+      }
+    },
+
     addRoll(bowlerId, pins) {
       if (this.currentGame) {
-        const scoreCard = this.currentGame._scorecards.find(
-          card => card._bowlerId === bowlerId
-        );
-        if (scoreCard) {
-          const frame = scoreCard.getCurrentFrame();
-          if (frame) {
-            scoreCard.setScore(frame.number, frame.getCurrentRoll(), pins);
-            this.saveState();
-          }
+        const scorecard = this.currentGame._scorecards.find(sc => sc._bowlerId === bowlerId);
+        if (scorecard) {
+          scorecard.addRoll(pins);
+          this.saveState();
         }
       }
     },
@@ -134,16 +172,18 @@ export const useBowlingStore = defineStore('bowling', {
             });
           });
 
-          // Restore games
-          this.games = state.games.map(gameData => {
-            const game = new Game();
-            game._id = gameData._id;
-            game._name = gameData._name;
-            game._bowlerIds = gameData._bowlerIds || [];
-            game._timestamp = gameData._timestamp;
-
-            // Only create score cards if they don't exist in saved state
-            if (gameData._scorecards && gameData._scorecards.length > 0) {
+          // Restore series
+          this.series = state.series.map(seriesData => {
+            const series = new Series();
+            series._id = seriesData._id;
+            series._name = seriesData._name;
+            series._location = seriesData._location;
+            series._bowlerIds = seriesData._bowlerIds || [];
+            series._games = seriesData._games.map(gameData => {
+              const game = new Game();
+              game._id = gameData._id;
+              game._seriesId = gameData._seriesId;
+              game._timestamp = gameData._timestamp;
               game._scorecards = gameData._scorecards.map(cardData => {
                 const bowler = this.getBowlerById(cardData._bowlerId);
                 if (!bowler) return null;
@@ -162,28 +202,24 @@ export const useBowlingStore = defineStore('bowling', {
                 }
                 return card;
               }).filter(Boolean);
-            } else {
-              // Create fresh score cards for each bowler
-              game._bowlerIds.forEach(bowlerId => {
-                const bowler = this.getBowlerById(bowlerId);
-                if (bowler) {
-                  game.addBowler(bowler);
-                }
-              });
-            }
-
-            return game;
+              return game;
+            });
+            return series;
           });
 
-          // Restore current game
-          if (state.currentGame) {
-            this.currentGame = this.games.find(g => g._id === state.currentGame._id) || null;
+          // Restore current series/game
+          if (state.currentSeries) {
+            this.currentSeries = this.series.find(s => s._id === state.currentSeries._id) || null;
+            if (this.currentSeries) {
+              this.currentGame = this.currentSeries.games[this.currentSeries.games.length - 1] || null;
+            }
           }
         }
       } catch (error) {
         console.error('Error loading state:', error);
         this.bowlers = [];
-        this.games = [];
+        this.series = [];
+        this.currentSeries = null;
         this.currentGame = null;
       }
     },
@@ -197,28 +233,36 @@ export const useBowlingStore = defineStore('bowling', {
             _games: bowler._games || [],
             _color: bowler._color
           })),
-          games: this.games.map(game => ({
-            _id: game._id,
-            _name: game._name,
-            _bowlerIds: game._bowlerIds,
-            _timestamp: game._timestamp,
-            _scorecards: game._scorecards.map(card => ({
-              _bowlerId: card._bowlerId,
-              _bowlerName: card._bowlerName,
-              _bowlerColor: card._bowlerColor,
-              _frames: card._frames.map(frame => ({
-                _frameNumber: frame._frameNumber,
-                _frameScore: frame._frameScore,
-                rolls: frame._rolls.map(roll => ({
-                  rollNumber: roll._rollNumber,
-                  pins: roll._pins,
-                  strike: roll._strike,
-                  spare: roll._spare,
-                  split: roll._split
+          series: this.series.map(series => ({
+            _id: series._id,
+            _name: series._name,
+            _location: series._location,
+            _bowlerIds: series._bowlerIds,
+            _games: series._games.map(game => ({
+              _id: game._id,
+              _seriesId: game._seriesId,
+              _timestamp: game._timestamp,
+              _scorecards: game._scorecards.map(card => ({
+                _bowlerId: card._bowlerId,
+                _bowlerName: card._bowlerName,
+                _bowlerColor: card._bowlerColor,
+                _frames: card._frames.map(frame => ({
+                  _frameNumber: frame._frameNumber,
+                  _frameScore: frame._frameScore,
+                  rolls: frame._rolls.map(roll => ({
+                    rollNumber: roll._rollNumber,
+                    pins: roll._pins,
+                    strike: roll._strike,
+                    spare: roll._spare,
+                    split: roll._split
+                  }))
                 }))
               }))
             }))
           })),
+          currentSeries: this.currentSeries ? {
+            _id: this.currentSeries._id
+          } : null,
           currentGame: this.currentGame ? {
             _id: this.currentGame._id
           } : null
@@ -231,21 +275,17 @@ export const useBowlingStore = defineStore('bowling', {
 
     clearAllData() {
       this.bowlers = [];
-      this.games = [];
+      this.series = [];
+      this.currentSeries = null;
       this.currentGame = null;
       this.saveState();
     },
 
-    setCurrentGame(gameId) {
-      if (!gameId) {
-        this.currentGame = null;
-        this.saveState();
-        return;
-      }
-
-      const game = this.games.find(g => g._id === gameId);
-      if (game) {
-        this.currentGame = game;
+    setCurrentSeries(seriesId) {
+      const series = this.getSeriesById(seriesId);
+      if (series) {
+        this.currentSeries = series;
+        this.currentGame = series.games[series.games.length - 1] || null;
         this.saveState();
       }
     }

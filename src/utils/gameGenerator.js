@@ -109,7 +109,7 @@ function generatePinConfiguration(pinsDown, skill) {
 }
 
 // Generate a random frame with realistic pin knockdowns
-function generateRandomFrame(skill, isLastFrame = false) {
+export function generateRandomFrame(skill, isLastFrame = false) {
   // First roll
   const firstRoll = new Roll(0);
   let remainingPins = 10;
@@ -215,55 +215,26 @@ const bowlingAlleys = [
   'Gutter & Glory'
 ];
 
-export function generateRandomGame() {
-  const store = useBowlingStore();
+// Generate a random game with realistic scores
+export function generateRandomGame(game, store) {
+  if (!game || !store) return;
 
-  // First ensure all our fixed bowlers exist in the store
-  bowlers.forEach(bowler => {
-    let existingBowler = store.bowlers.find(b => b.id === bowler.id);
-    if (!existingBowler) {
-      existingBowler = store.addBowler(bowler.name, bowler.id);
-      existingBowler.skill = bowler.skill;
-      existingBowler.color = bowler.color;
-    }
-  });
+  // Generate frames for each scorecard
+  game._scorecards.forEach(scorecard => {
+    for (let frameNum = 1; frameNum <= 10; frameNum++) {
+      const bowler = store.getBowlerById(scorecard._bowlerId);
+      if (!bowler) continue;
 
-  // Generate 2-4 random bowlers
-  const numBowlers = Math.floor(Math.random() * 3) + 2;
-  const availableBowlers = [...bowlers];
-
-  const bowlersInGame = [];
-  for (let i = 0; i < numBowlers; i++) {
-    // Randomly select a bowler and remove them from available bowlers
-    const bowlerIndex = Math.floor(Math.random() * availableBowlers.length);
-    const selectedBowler = availableBowlers.splice(bowlerIndex, 1)[0];
-
-    // Get the existing bowler from the store
-    const bowler = store.getBowlerById(selectedBowler.id);
-    bowlersInGame.push(bowler);
-  }
-
-  // Select a random bowling alley name
-  const alleyName = bowlingAlleys[Math.floor(Math.random() * bowlingAlleys.length)];
-  const game = store.startNewGame(bowlersInGame.map(b => b.id), alleyName);
-
-  // Generate random scores for each bowler
-  game.scorecards.forEach((scoreCard, index) => {
-    const skill = bowlersInGame[index].skill; // Use the fixed skill level
-
-    // Generate 10 frames
-    for (let frame = 1; frame <= 10; frame++) {
-      const frameData = generateRandomFrame(skill, frame === 10);
-      frameData.forEach((roll, rollIndex) => {
-        scoreCard.setScore(frame, rollIndex + 1, countPinsDown(roll.pinData), roll.pinData);
+      const frame = generateRandomFrame(bowler.skill || 0.5, frameNum === 10);
+      frame.forEach((roll, index) => {
+        scorecard.setScore(frameNum, index + 1, countPinsDown(roll.pinData), roll.pinData);
       });
     }
   });
-
-  store.saveState();
-  return game;
 }
 
-export function generateSampleGame() {
-  return generateRandomGame();
+// Generate a sample game with the store's current bowlers
+export function generateSampleGame(store) {
+  if (!store.currentGame) return;
+  generateRandomGame(store.currentGame, store);
 }

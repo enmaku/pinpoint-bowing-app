@@ -1,30 +1,38 @@
 <template>
   <q-page class="q-pa-md">
-    <div class="text-h5 q-mb-md">Create New Game</div>
+    <div class="text-h5 q-mb-md">Create New Series</div>
 
     <q-form @submit="onSubmit" class="q-gutter-md">
-      <!-- Game Name -->
+      <!-- Series Name -->
       <q-select
-        v-model="gameName"
-        :options="gameNameOptions"
-        label="Game Name"
+        v-model="seriesName"
+        :options="seriesNameOptions"
+        label="Series Name"
         filled
         use-input
         hide-selected
         fill-input
         input-debounce="0"
-        @filter="filterGameNames"
-        @input-value="setGameName"
+        @filter="filterSeriesNames"
+        @input-value="setSeriesName"
         hint="Select an existing name or enter a new one"
       >
         <template v-slot:no-option>
           <q-item>
             <q-item-section class="text-grey">
-              Press Enter to use "{{ inputValue || 'New Game' }}"
+              Press Enter to use "{{ inputValue || 'New Series' }}"
             </q-item-section>
           </q-item>
         </template>
       </q-select>
+
+      <!-- Location -->
+      <q-input
+        v-model="location"
+        label="Location"
+        filled
+        hint="Enter the bowling alley or location"
+      />
 
       <!-- Bowler Selection -->
       <q-select
@@ -57,7 +65,7 @@
           to="/games/"
         />
         <q-btn
-          label="Create Game"
+          label="Create Series"
           type="submit"
           color="primary"
         />
@@ -74,35 +82,35 @@ import { useBowlingStore } from 'src/stores/bowling-store';
 const router = useRouter();
 const store = useBowlingStore();
 
-// Game name handling
-const gameName = ref('');
+// Series name handling
+const seriesName = ref('');
+const location = ref('');
 const inputValue = ref('');
-const gameNameOptions = ref([]);
+const seriesNameOptions = ref([]);
 
-// Get unique game names from existing games
-const existingGameNames = computed(() => {
-  const names = store.games.map(game => game._name);
+// Get unique series names from existing series
+const existingSeriesNames = computed(() => {
+  const names = store.series.map(series => series._name);
   return [...new Set(names)];
 });
 
-function filterGameNames(val, update) {
+function filterSeriesNames(val, update) {
   inputValue.value = val;
 
   update(() => {
     if (val === '') {
-      gameNameOptions.value = existingGameNames.value;
+      seriesNameOptions.value = existingSeriesNames.value;
     } else {
       const needle = val.toLowerCase();
-      gameNameOptions.value = existingGameNames.value.filter(
+      seriesNameOptions.value = existingSeriesNames.value.filter(
         v => v.toLowerCase().indexOf(needle) > -1
       );
     }
   });
 }
 
-function setGameName(val) {
-  gameName.value = val;
-  inputValue.value = val;
+function setSeriesName(val) {
+  seriesName.value = val || 'New Series';
 }
 
 // Bowler selection handling
@@ -110,36 +118,29 @@ const selectedBowlers = ref([]);
 
 const bowlerOptions = computed(() => {
   return store.bowlers.map(bowler => ({
-    label: bowler.name,
-    value: bowler.id
+    label: bowler._name,
+    value: bowler._id
   }));
 });
 
-const getBowlerAverageScore = (bowlerId) => {
+function getBowlerAverageScore(bowlerId) {
   return store.getBowlerAverageScore(bowlerId);
-};
+}
 
-// Form submission
 async function onSubmit() {
-  if (selectedBowlers.value.length === 0) return;
-
-  // Use the input value if no game name is selected from the dropdown
-  const finalGameName = gameName.value || inputValue.value || 'New Game';
-
-  // Do exactly what gameGenerator does:
-  const bowlersInGame = [];
-  for (const selected of selectedBowlers.value) {
-    const bowler = store.getBowlerById(selected.value);
-    if (bowler) {
-      bowlersInGame.push(bowler);
+  try {
+    const series = store.startNewSeries(
+      selectedBowlers.value,
+      seriesName.value || 'New Series',
+      location.value
+    );
+    
+    if (series) {
+      router.push('/games');
     }
+  } catch (error) {
+    console.error('Error creating series:', error);
   }
-
-  // Create game with bowlers, exactly like gameGenerator
-  store.startNewGame(bowlersInGame.map(b => b.id), finalGameName);
-
-  // Navigate back to the games list
-  router.push('/games/');
 }
 </script>
 

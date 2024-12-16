@@ -1,61 +1,104 @@
 <template>
-  <q-page class="q-pb-xl">
-    <div v-if="games.length > 0" class="q-pa-md">
-      <div v-for="game in games" :key="game.id" class="q-mb-md">
-        <GameRecord :game="game" />
+  <q-page class="q-pb-md">
+    <div class="q-pa-none">
+      <div v-if="series.length > 0" class="q-pa-none">
+        <div v-for="seriesItem in series" :key="seriesItem.id">
+          <q-expansion-item
+            group="series"
+            expand-icon-class="text-primary"
+            class="q-py-none"
+            dense
+          >
+            <template #header>
+              <div class="column full-width series-header">
+                <div class="row items-center justify-between no-wrap">
+                  <div class="col-auto text-primary text-h6">{{ seriesItem._name }}</div>
+                  <div class="col-auto text-caption no-wrap">{{ formatDate(seriesItem._timestamp) }}</div>
+                </div>
+                <div class="row items-center q-gutter-x-xs">
+                  <q-chip
+                    v-for="bowlerId in seriesItem._bowlerIds"
+                    :key="bowlerId"
+                    :label="getBowlerName(bowlerId)"
+                    :color="getBowlerColor(bowlerId)"
+                    text-color="white"
+                    size="sm"
+                    class="q-ma-none"
+                  />
+                </div>
+              </div>
+            </template>
+
+            <q-card>
+              <q-card-section class="q-pa-sm">
+                <div class="text-subtitle2">Location: {{ seriesItem._location }}</div>
+                <div v-for="game in seriesItem._games" :key="game._id" class="q-mt-sm">
+                  <GameRecord :game="game" />
+                </div>
+              </q-card-section>
+            </q-card>
+          </q-expansion-item>
+        </div>
       </div>
-    </div>
 
-    <div v-else class="text-center q-pa-md">
-      <p class="text-h6">No games yet!</p>
-      <p>Start a new game or generate sample games to get started.</p>
-    </div>
+      <div v-else class="text-center q-pa-sm">
+        <p class="text-h6">No series yet!</p>
+        <p>Start a new series or generate sample series to get started.</p>
+      </div>
 
-    <q-dialog v-model="showDialog" persistent>
-      <q-card style="min-width: 350px">
-        <q-card-section>
-          <div class="text-h6">Generate Games</div>
-        </q-card-section>
+      <q-dialog v-model="showDialog" persistent>
+        <q-card style="min-width: 350px">
+          <q-card-section>
+            <div class="text-h6">Generate Series</div>
+          </q-card-section>
 
-        <q-card-section class="q-pt-none">
-          <q-input
-            v-model.number="numGames"
-            type="number"
-            label="Number of games to generate"
-            :rules="[val => val > 0 || 'Please enter a number greater than 0']"
+          <q-card-section class="q-pt-none">
+            <q-input
+              v-model.number="numSeries"
+              type="number"
+              label="Number of series to generate"
+              :rules="[val => val > 0 || 'Please enter a number greater than 0']"
+            />
+            <q-input
+              v-model.number="gamesPerSeries"
+              type="number"
+              label="Games per series"
+              class="q-mt-md"
+              :rules="[val => val > 0 || 'Please enter a number greater than 0']"
+            />
+          </q-card-section>
+
+          <q-card-actions align="right" class="text-primary">
+            <q-btn flat label="Cancel" v-close-popup />
+            <q-btn flat label="Generate" @click="generateSeries" v-close-popup />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+
+      <q-page-sticky position="bottom" :offset="[18, 18]">
+        <q-fab icon="add" direction="up" color="primary">
+          <q-fab-action
+            color="primary"
+            @click="router.push('/games/create')"
+            icon="sports_score"
+            label="Create New Series"
           />
-        </q-card-section>
-
-        <q-card-actions align="right" class="text-primary">
-          <q-btn flat label="Cancel" v-close-popup />
-          <q-btn flat label="Generate" @click="generateGames" v-close-popup />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
-    <q-page-sticky position="bottom" :offset="[18, 18]">
-      <q-fab icon="add" direction="up" color="primary">
-        <q-fab-action
-          color="primary"
-          @click="router.push('/games/create')"
-          icon="sports_score"
-          label="Create New Game"
-        />
-        <q-fab-action
-          color="primary"
-          @click="showDialog = true"
-          icon="casino"
-          label="Generate Sample Games"
-        />
-        <q-fab-action
-          v-if="hasData"
-          color="negative"
-          @click="store.clearAllData"
-          icon="delete_forever"
-          label="Clear All Data"
-        />
-      </q-fab>
-    </q-page-sticky>
+          <q-fab-action
+            color="primary"
+            @click="showDialog = true"
+            icon="casino"
+            label="Generate Sample Series"
+          />
+          <q-fab-action
+            v-if="hasData"
+            color="negative"
+            @click="store.clearAllData"
+            icon="delete_forever"
+            label="Clear All Data"
+          />
+        </q-fab>
+      </q-page-sticky>
+    </div>
   </q-page>
 </template>
 
@@ -69,21 +112,73 @@ import { generateSampleGame } from 'src/utils/gameGenerator';
 const router = useRouter();
 const store = useBowlingStore();
 const showDialog = ref(false);
-const numGames = ref(1);
+const numSeries = ref(1);
+const gamesPerSeries = ref(3);
 
-const games = computed(() => {
-  return [...store.games].sort((a, b) => new Date(b._timestamp) - new Date(a._timestamp));
+const series = computed(() => {
+  return [...store.series].sort((a, b) => new Date(b._timestamp) - new Date(a._timestamp));
 });
 
-const hasData = computed(() => store.bowlers.length > 0 || store.games.length > 0);
+const hasData = computed(() => store.bowlers.length > 0 || store.series.length > 0);
 
-function generateGames() {
-  const count = parseInt(numGames.value);
-  if (count > 0) {
-    for (let i = 0; i < count; i++) {
-      generateSampleGame(store);
+function getBowlerName(bowlerId) {
+  const bowler = store.getBowlerById(bowlerId);
+  return bowler ? bowler._name : 'Unknown Bowler';
+}
+
+function getBowlerColor(bowlerId) {
+  const bowler = store.getBowlerById(bowlerId);
+  return bowler ? bowler.color : 'primary';
+}
+
+function formatDate(timestamp) {
+  return new Date(timestamp).toLocaleDateString();
+}
+
+function addGameToSeries(series) {
+  store.setCurrentSeries(series._id);
+  store.startNewGame();
+}
+
+function generateSeries() {
+  const seriesCount = parseInt(numSeries.value);
+  const gamesCount = parseInt(gamesPerSeries.value);
+
+  if (seriesCount > 0 && gamesCount > 0) {
+    // First ensure we have some bowlers
+    if (store.bowlers.length === 0) {
+      store.addBowler('Alice', 'bowler_alice');
+      store.addBowler('Bob', 'bowler_bob');
+      store.addBowler('Carol', 'bowler_carol');
+      store.addBowler('Dave', 'bowler_dave');
     }
-    numGames.value = 1;
+
+    for (let i = 0; i < seriesCount; i++) {
+      // Select 2-4 random bowlers for this series
+      const numBowlers = Math.floor(Math.random() * 3) + 2;
+      const availableBowlers = [...store.bowlers];
+      const selectedBowlers = [];
+
+      for (let j = 0; j < numBowlers && availableBowlers.length > 0; j++) {
+        const index = Math.floor(Math.random() * availableBowlers.length);
+        selectedBowlers.push(availableBowlers.splice(index, 1)[0]);
+      }
+
+      // Create the series with the selected bowlers
+      const series = store.startNewSeries(
+        selectedBowlers.map(b => b._id),
+        `Sample Series ${i + 1}`,
+        ['ABC Lanes', 'XYZ Bowl', 'Strike City'][Math.floor(Math.random() * 3)]
+      );
+
+      // Generate additional games for this series
+      for (let j = 0; j < gamesCount - 1; j++) {
+        store.startNewGame(true);
+      }
+    }
+
+    numSeries.value = 1;
+    gamesPerSeries.value = 3;
   }
 }
 
@@ -91,3 +186,45 @@ onMounted(() => {
   store.initializeStore();
 });
 </script>
+
+<style>
+.q-expansion-item {
+  border-bottom: 1px solid #e0e0e0;
+  border-radius: 0;
+  margin: 0;
+}
+
+.q-expansion-item:first-child {
+  border-top: 1px solid #e0e0e0;
+}
+
+.series-header {
+  padding: 8px;
+}
+
+.q-expansion-item__container {
+  padding: 0;
+}
+
+.q-expansion-item__content {
+  padding: 8px;
+  background: #f8f8f8;
+  border-top: 1px solid #e0e0e0;
+}
+
+.q-chip {
+  min-width: 32px;
+}
+
+.text-h6 {
+  font-size: 1.15rem;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.text-subtitle2 {
+  font-size: 0.9rem;
+  line-height: 1.2;
+  margin: 0;
+}
+</style>

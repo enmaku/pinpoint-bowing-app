@@ -1,25 +1,22 @@
 import ScoreCard from './ScoreCard';
 
 export default class Game {
-  constructor() {
+  constructor(seriesId = null) {
     this._id = 'game_' + Math.random().toString(16).slice(2);
-    this._name = 'New Game';
-    this._bowlerIds = [];
+    this._seriesId = seriesId;
     this._scorecards = [];
     this._timestamp = new Date();
   }
 
-  addBowler(bowler) {
-    this._bowlerIds.push(bowler._id);
+  addScorecard(bowler) {
     const scorecard = new ScoreCard(bowler);
     this._scorecards.push(scorecard);
     return scorecard;
   }
 
-  removeBowler(id) {
-    const index = this._bowlerIds.indexOf(id);
+  removeScorecard(bowlerId) {
+    const index = this._scorecards.findIndex(sc => sc._bowlerId === bowlerId);
     if (index !== -1) {
-      this._bowlerIds.splice(index, 1);
       this._scorecards.splice(index, 1);
     }
   }
@@ -28,24 +25,12 @@ export default class Game {
     return this._id;
   }
 
-  set id(value) {
-    this._id = value;
-  }
-
   get timestamp() {
     return this._timestamp;
   }
 
-  get name() {
-    return this._name;
-  }
-
-  set name(value) {
-    this._name = value;
-  }
-
-  get bowlerIds() {
-    return this._bowlerIds;
+  get seriesId() {
+    return this._seriesId;
   }
 
   get scorecards() {
