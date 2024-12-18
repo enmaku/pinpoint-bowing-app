@@ -147,10 +147,12 @@ function generateSeries() {
   if (seriesCount > 0 && gamesCount > 0) {
     // First ensure we have some bowlers
     if (store.bowlers.length === 0) {
-      store.addBowler('Alice', 'bowler_alice');
-      store.addBowler('Bob', 'bowler_bob');
-      store.addBowler('Carol', 'bowler_carol');
-      store.addBowler('Dave', 'bowler_dave');
+      store.addBowler('Alice', 'bowler_alice');   // Pro (0.9)
+      store.addBowler('Bob', 'bowler_bob');       // Pro (0.8)
+      store.addBowler('Carol', 'bowler_carol');   // Intermediate (0.6)
+      store.addBowler('Dave', 'bowler_dave');     // Beginner (0.4)
+      store.addBowler('Eve', 'bowler_eve');       // Beginner (0.2)
+      store.addBowler('Mallory', 'bowler_mallory'); // Novice (0.0)
     }
 
     const locations = [

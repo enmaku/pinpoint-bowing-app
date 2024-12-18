@@ -64,12 +64,21 @@ export const useBowlingStore = defineStore('bowling', {
       const bowler = new Bowler(id || `bowler_${Date.now()}`);
       bowler.name = name;
       bowler.color = {
-        'bowler_alice': 'red',
-        'bowler_bob': 'blue',
-        'bowler_carol': 'green',
-        'bowler_dave': 'orange'
+        'bowler_alice': 'blue',     // Pro
+        'bowler_bob': 'red',       // Pro
+        'bowler_carol': 'green',   // Intermediate
+        'bowler_dave': 'orange',   // Beginner
+        'bowler_eve': 'purple',    // Beginner
+        'bowler_mallory': 'brown'  // Novice
       }[id] || ['red', 'blue', 'green', 'orange', 'purple', 'cyan', 'pink', 'teal'][this.bowlers.length % 8];
-      bowler.skill = 0.7;
+      bowler.skill = {
+        'bowler_alice': 0.9,    // Pro
+        'bowler_bob': 0.8,      // Pro
+        'bowler_carol': 0.6,    // Intermediate
+        'bowler_dave': 0.4,     // Beginner
+        'bowler_eve': 0.2,      // Beginner
+        'bowler_mallory': 0.0   // Novice
+      }[id] || 0.5;  // Default to medium skill (0.5) for new bowlers
       this.bowlers.push(bowler);
       this.saveState();
       return bowler;

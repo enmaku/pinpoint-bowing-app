@@ -55,16 +55,20 @@ export default class ScoreCard {
         const roll = frame.rolls.find(roll => roll.rollNumber === r);
         if (!roll) continue;
 
-        frameScore += roll.pins || 0;
+        // A foul counts as 0 pins but still allows for spares
+        frameScore += roll.foul ? 0 : (roll.pins || 0);
+
         if (roll.strike || roll.spare) {
           const nextFrame = this._frames.find(frame => frame.frameNumber === f + 1);
           if (nextFrame) {
             const nextRoll1 = nextFrame.rolls.find(roll => roll.rollNumber === 1);
-            if (nextRoll1) frameScore += nextRoll1.pins || 0;
+            // Add bonus pins from next roll, counting 0 for fouls
+            if (nextRoll1) frameScore += nextRoll1.foul ? 0 : (nextRoll1.pins || 0);
 
             if (roll.strike) {
               const nextRoll2 = nextFrame.rolls.find(roll => roll.rollNumber === 2);
-              if (nextRoll2) frameScore += nextRoll2.pins || 0;
+              // Add bonus pins from second next roll, counting 0 for fouls
+              if (nextRoll2) frameScore += nextRoll2.foul ? 0 : (nextRoll2.pins || 0);
             }
           }
         }
@@ -78,7 +82,8 @@ export default class ScoreCard {
     if (finalFrame) {
       for (let r = 1; r <= 3; r++) {
         const roll = finalFrame.rolls.find(roll => roll.rollNumber === r);
-        if (roll) score += roll.pins || 0;
+        // Add pins for each roll, counting 0 for fouls
+        if (roll) score += roll.foul ? 0 : (roll.pins || 0);
       }
       finalFrame.frameScore = score;
     }
