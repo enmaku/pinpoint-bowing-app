@@ -194,7 +194,8 @@ function generateSeries() {
       const series = store.startNewSeries(
         selectedBowlers.map(b => b._id),
         seriesName,
-        location
+        location,
+        true  // Generate scores for the first game
       );
 
       // Update series timestamp

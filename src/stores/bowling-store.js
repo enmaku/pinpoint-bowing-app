@@ -97,7 +97,7 @@ export const useBowlingStore = defineStore('bowling', {
       }
     },
 
-    startNewSeries(bowlerIds, name, location) {
+    startNewSeries(bowlerIds, name, location, generateScores = false) {
       const series = new Series(name, location);
       // Handle both bowler objects and IDs
       series._bowlerIds = bowlerIds.map(bowler => 
@@ -108,8 +108,8 @@ export const useBowlingStore = defineStore('bowling', {
       this.series.push(series);
       this.currentSeries = series;
       
-      // Start the first game without generating scores
-      this.startNewGame(false);
+      // Start the first game with or without generating scores
+      this.startNewGame(generateScores);
       
       this.saveState();
       return series;

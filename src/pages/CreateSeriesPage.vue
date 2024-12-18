@@ -197,7 +197,8 @@ async function onSubmit() {
     const series = store.startNewSeries(
       selectedBowlers.value.map(bowler => bowler.value),
       seriesName.value || 'New Series',
-      location.value
+      location.value,
+      false  // Don't generate scores for manually created series
     );
 
     if (series) {
