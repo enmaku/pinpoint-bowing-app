@@ -3,6 +3,8 @@ import Bowler from '../models/Bowler';
 import Game from '../models/Game';
 import Series from '../models/Series';
 import ScoreCard from '../models/ScoreCard';
+import Frame from '../models/Frame';
+import Roll from '../models/Roll';
 import { generateRandomFrame, generateRandomGame } from '../utils/gameGenerator';
 
 export const useBowlingStore = defineStore('bowling', {
@@ -180,7 +182,8 @@ export const useBowlingStore = defineStore('bowling', {
               _id: bowlerData._id,
               _name: bowlerData._name,
               _games: bowlerData._games || [],
-              _color: bowlerData._color || 'red'
+              _color: bowlerData._color || 'red',
+              _skill: bowlerData._skill || 0.5
             });
           });
 
@@ -199,15 +202,22 @@ export const useBowlingStore = defineStore('bowling', {
                 if (!bowler) return null;
 
                 const card = new ScoreCard(bowler);
+                card._scores = cardData._scores || {};
                 if (cardData._frames) {
-                  cardData._frames.forEach(frameData => {
-                    if (frameData.rolls) {
-                      frameData.rolls.forEach(rollData => {
-                        if (typeof rollData.pins !== 'undefined') {
-                          card.setScore(frameData._frameNumber, rollData.rollNumber, rollData.pins, null, rollData.split);
-                        }
-                      });
-                    }
+                  card._frames = cardData._frames.map(frameData => {
+                    const frame = new Frame(frameData._frameNumber, frameData._rolls.length);
+                    frame._frameScore = frameData._frameScore;
+                    frame._rolls = frameData._rolls.map(rollData => {
+                      const roll = new Roll(rollData._rollNumber);
+                      roll._pins = rollData._pins;
+                      roll._strike = rollData._strike;
+                      roll._spare = rollData._spare;
+                      roll._split = rollData._split;
+                      roll._pinData = rollData._pinData;
+                      roll._foul = rollData._foul;
+                      return roll;
+                    });
+                    return frame;
                   });
                 }
                 return card;
@@ -241,7 +251,8 @@ export const useBowlingStore = defineStore('bowling', {
             _id: bowler._id,
             _name: bowler._name,
             _games: bowler._games || [],
-            _color: bowler._color
+            _color: bowler._color,
+            _skill: bowler._skill
           })),
           series: this.series.map(series => ({
             _id: series._id,
@@ -257,15 +268,18 @@ export const useBowlingStore = defineStore('bowling', {
                 _bowlerId: card._bowlerId,
                 _bowlerName: card._bowlerName,
                 _bowlerColor: card._bowlerColor,
+                _scores: card._scores,
                 _frames: card._frames.map(frame => ({
                   _frameNumber: frame._frameNumber,
                   _frameScore: frame._frameScore,
-                  rolls: frame._rolls.map(roll => ({
-                    rollNumber: roll._rollNumber,
-                    pins: roll._pins,
-                    strike: roll._strike,
-                    spare: roll._spare,
-                    split: roll._split
+                  _rolls: frame._rolls.map(roll => ({
+                    _rollNumber: roll._rollNumber,
+                    _pins: roll._pins,
+                    _strike: roll._strike,
+                    _spare: roll._spare,
+                    _split: roll._split,
+                    _pinData: roll._pinData,
+                    _foul: roll._foul
                   }))
                 }))
               }))
