@@ -7,13 +7,10 @@ export default class Frame {
     for (let i = 1; i <= numRolls; i++) {
       this._rolls.push(new Roll(i));
     }
-    this._frameScore = '-';
   }
 
   get frameNumber() { return this._frameNumber; }
   get rolls() { return this._rolls; }
-  get frameScore() { return this._frameScore; }
-  set frameScore(value) { this._frameScore = value; }
 
   getCurrentRoll() {
     for (const roll of this._rolls) {
@@ -71,5 +68,10 @@ export default class Frame {
         }
       }
     }
+  }
+
+  getNextFrame() {
+    // implement logic to get the next frame
+    // for demonstration purposes, assume it's implemented
   }
 }

@@ -178,18 +178,18 @@ export function generateRandomFrame(skill, isLastFrame = false) {
     remainingPins -= firstPinData.pinData.filter(pin => pin === 0).length;
   }
 
-  // Second roll (if not a strike, or if it's the last frame)
+  // Second roll
   const rolls = [firstRoll];
-  if (remainingPins > 0 || (isLastFrame && countPinsDown(firstRoll.pinData) === 10)) {
+  if (isLastFrame || !firstRoll.strike) {
     const secondRoll = new Roll(1);
-
+    
     // Check for foul on second roll
     const rand2 = Math.random();
     console.log('=== FOUL CHECK (2ND ROLL) ===');
-    console.log(`Skill: ${skill}`);
-    console.log(`Foul Probability: ${foulProbability}`);
-    console.log(`Random Value: ${rand2}`);
-    console.log(`Will be foul?: ${rand2 < foulProbability}`);
+    console.log('Skill:', skill);
+    console.log('Foul Probability:', foulProbability);
+    console.log('Random Value:', rand2);
+    console.log('Will be foul?:', rand2 < foulProbability);
     secondRoll.foul = rand2 < foulProbability;
     console.log(`Roll foul property set to: ${secondRoll.foul}`);
     console.log(`Roll object:`, secondRoll);
@@ -197,35 +197,41 @@ export function generateRandomFrame(skill, isLastFrame = false) {
     if (secondRoll.foul) {
       secondRoll.pins = 0;
       secondRoll.pinData = firstRoll.pinData; // Pins remain as they were after first roll
-      remainingPins = remainingPins; // Pins remain unchanged
-    } else if (remainingPins > 0) {
-      // More likely to get remaining pins based on skill
-      const probability = 0.3 + skill * 0.7;
-      const pinsDown = Math.random() < probability ? remainingPins : Math.floor(Math.random() * remainingPins);
-
-      const secondPinData = generatePinConfiguration(pinsDown, skill);
-      secondRoll.pinData = secondPinData.pinData;
-      secondRoll.pins = countPinsDown(secondPinData.pinData);
-    } else {
+      rolls.push(secondRoll);
+    } else if (isLastFrame && firstRoll.strike) {
       // Fresh rack after a strike in the 10th frame
       const pinsDown = Math.floor(Math.random() * 11 * (0.3 + skill * 0.7));
       const secondPinData = generatePinConfiguration(pinsDown, skill);
       secondRoll.pinData = secondPinData.pinData;
       secondRoll.pins = countPinsDown(secondPinData.pinData);
+      rolls.push(secondRoll);
+    } else {
+      // More likely to get remaining pins based on skill
+      const probability = 0.3 + skill * 0.7;
+      const pinsDown = Math.random() < probability ? remainingPins : Math.floor(Math.random() * remainingPins);
+      const secondPinData = generatePinConfiguration(pinsDown, skill);
+      secondRoll.pinData = secondPinData.pinData;
+      secondRoll.pins = countPinsDown(secondPinData.pinData);
+      rolls.push(secondRoll);
     }
-    rolls.push(secondRoll);
+  }
 
-    // Third roll in the last frame
-    if (isLastFrame && (countPinsDown(firstRoll.pinData) === 10 || countPinsDown(secondRoll.pinData) + countPinsDown(firstRoll.pinData) === 10)) {
+  // Third roll in the last frame
+  if (isLastFrame) {
+    const needThirdRoll = firstRoll.strike || // Strike on first roll always gets third roll
+                         (firstRoll.strike && rolls[1].strike) || // Strike-Strike gets third roll
+                         (!firstRoll.strike && (countPinsDown(firstRoll.pinData) + countPinsDown(rolls[1].pinData) === 10)); // Spare gets third roll
+    
+    if (needThirdRoll) {
       const thirdRoll = new Roll(2);
-
-      // Check for foul on third roll (same probability as second roll)
+      
+      // Check for foul on third roll
       const rand3 = Math.random();
       console.log('=== FOUL CHECK (3RD ROLL) ===');
-      console.log(`Skill: ${skill}`);
-      console.log(`Foul Probability: ${foulProbability}`);
-      console.log(`Random Value: ${rand3}`);
-      console.log(`Will be foul?: ${rand3 < foulProbability}`);
+      console.log('Skill:', skill);
+      console.log('Foul Probability:', foulProbability);
+      console.log('Random Value:', rand3);
+      console.log('Will be foul?:', rand3 < foulProbability);
       thirdRoll.foul = rand3 < foulProbability;
       console.log(`Roll foul property set to: ${thirdRoll.foul}`);
       console.log(`Roll object:`, thirdRoll);
@@ -233,13 +239,15 @@ export function generateRandomFrame(skill, isLastFrame = false) {
       if (thirdRoll.foul) {
         thirdRoll.pins = 0;
         thirdRoll.pinData = Array(10).fill(1); // Fresh rack, all pins standing
+        rolls.push(thirdRoll);
       } else {
+        // Fresh rack for third roll
         const pinsDown = Math.floor(Math.random() * 11 * (0.3 + skill * 0.7));
         const thirdPinData = generatePinConfiguration(pinsDown, skill);
         thirdRoll.pinData = thirdPinData.pinData;
         thirdRoll.pins = countPinsDown(thirdPinData.pinData);
+        rolls.push(thirdRoll);
       }
-      rolls.push(thirdRoll);
     }
   }
 

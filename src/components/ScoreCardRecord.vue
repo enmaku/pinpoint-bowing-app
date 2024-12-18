@@ -17,7 +17,7 @@
         </div>
         <div class="row">
           <div class="col scorecard">
-            {{ frame.frameScore == 0 ? '-' : frame.frameScore }}
+            {{ scorecard.cumulativeScores[frame.frameNumber - 1] || '-' }}
           </div>
         </div>
       </div>
