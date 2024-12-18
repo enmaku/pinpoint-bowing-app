@@ -204,7 +204,7 @@ export const useBowlingStore = defineStore('bowling', {
                     if (frameData.rolls) {
                       frameData.rolls.forEach(rollData => {
                         if (typeof rollData.pins !== 'undefined') {
-                          card.setScore(frameData._frameNumber, rollData.rollNumber, rollData.pins);
+                          card.setScore(frameData._frameNumber, rollData.rollNumber, rollData.pins, null, rollData.split);
                         }
                       });
                     }
