@@ -97,8 +97,8 @@ export const useBowlingStore = defineStore('bowling', {
       }
     },
 
-    startNewSeries(bowlerIds, name, location, generateScores = false) {
-      const series = new Series(name, location);
+    startNewSeries(bowlerIds, name, location, generateScores = false, timestamp = null) {
+      const series = new Series(name, location, timestamp);
       // Handle both bowler objects and IDs
       series._bowlerIds = bowlerIds.map(bowler => 
         typeof bowler === 'string' ? bowler : 
@@ -186,10 +186,8 @@ export const useBowlingStore = defineStore('bowling', {
 
           // Restore series
           this.series = state.series.map(seriesData => {
-            const series = new Series();
+            const series = new Series(seriesData._name, seriesData._location, new Date(seriesData._timestamp));
             series._id = seriesData._id;
-            series._name = seriesData._name;
-            series._location = seriesData._location;
             series._bowlerIds = seriesData._bowlerIds || [];
             series._games = seriesData._games.map(gameData => {
               const game = new Game();
@@ -250,6 +248,7 @@ export const useBowlingStore = defineStore('bowling', {
             _name: series._name,
             _location: series._location,
             _bowlerIds: series._bowlerIds,
+            _timestamp: series._timestamp,
             _games: series._games.map(game => ({
               _id: game._id,
               _seriesId: game._seriesId,

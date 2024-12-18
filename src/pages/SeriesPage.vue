@@ -175,8 +175,20 @@ function generateSeries() {
       }
 
       // Calculate base timestamp for this series (days ago)
-      const daysAgo = i * (Math.floor(Math.random() * 3) + 1); // 1-3 days between series
-      const seriesDate = new Date(Date.now() - (daysAgo * 24 * 60 * 60 * 1000));
+      // Make gaps between series more distinct: 2-4 days between series
+      const daysAgo = i * (Math.floor(Math.random() * 3) + 2);
+      // Vary the time of day: between 11 AM and 10 PM
+      const hoursOffset = Math.floor(Math.random() * 11) + 11;
+      const minutesOffset = Math.floor(Math.random() * 60);
+      
+      const now = new Date();
+      const seriesDate = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() - daysAgo,
+        hoursOffset,
+        minutesOffset
+      );
       
       // Generate series name from bowlers
       const location = locations[Math.floor(Math.random() * locations.length)];
@@ -195,19 +207,23 @@ function generateSeries() {
         selectedBowlers.map(b => b._id),
         seriesName,
         location,
-        true  // Generate scores for the first game
+        true,  // Generate scores for the first game
+        seriesDate  // Pass the timestamp directly
       );
 
-      // Update series timestamp
-      store.series[store.series.length - 1]._timestamp = seriesDate.toISOString();
+      // Set first game timestamp
+      store.currentSeries._games[0]._timestamp = seriesDate.toISOString();
 
       // Generate additional games for this series with realistic timestamps
-      const minutesPerGame = numBowlers * 12 + Math.floor(Math.random() * 10); // 12-15 mins per player
+      // Each game takes 12-15 minutes per player, plus 5-10 minutes between games
+      const minutesPerGame = (numBowlers * (12 + Math.floor(Math.random() * 4))) + 
+                           (5 + Math.floor(Math.random() * 6));
+      
       for (let j = 0; j < gamesCount - 1; j++) {
         store.startNewGame(true);
         // Set game timestamp to be after the previous game
-        const gameTime = new Date(seriesDate.getTime() + (j + 1) * minutesPerGame * 60 * 1000);
-        store.currentSeries._games[store.currentSeries._games.length - 1]._timestamp = gameTime;
+        const gameTime = new Date(seriesDate.getTime() + ((j + 1) * minutesPerGame * 60 * 1000));
+        store.currentSeries._games[store.currentSeries._games.length - 1]._timestamp = gameTime.toISOString();
       }
     }
 

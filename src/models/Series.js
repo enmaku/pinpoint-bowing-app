@@ -1,11 +1,11 @@
 export default class Series {
-  constructor(name = '', location = '') {
+  constructor(name = '', location = '', timestamp = null) {
     this._id = 'series_' + Math.random().toString(16).substring(2);
     this._name = name;
     this._location = location;
     this._bowlerIds = [];
     this._games = [];
-    this._timestamp = new Date();
+    this._timestamp = timestamp || new Date();
   }
 
   addBowler(bowler) {

@@ -198,7 +198,8 @@ async function onSubmit() {
       selectedBowlers.value.map(bowler => bowler.value),
       seriesName.value || 'New Series',
       location.value,
-      false  // Don't generate scores for manually created series
+      false,  // Don't generate scores for manually created series
+      null    // Use current time for manually created series
     );
 
     if (series) {
