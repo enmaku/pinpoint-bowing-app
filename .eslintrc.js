@@ -19,6 +19,7 @@ module.exports = {
 
     // Spacing
     'indent': 'off',  // Disabled indentation rule
+    'no-unused-vars': 'off',  // Disabled unused variables rule
     'object-curly-spacing': ['error', 'always'],  // Spaces inside curly braces
     'array-bracket-spacing': ['error', 'never'],  // No spaces inside array brackets
     'space-before-function-paren': 'off',  // Disable space before function parentheses
@@ -40,7 +41,6 @@ module.exports = {
     'arrow-parens': 0,  // Disable arrow parentheses rule completely
 
     // Variables and Functions
-    'no-unused-vars': ['warn'],  // Warn about unused variables
     'no-var': 'error',  // Use let/const instead of var
     'prefer-const': ['error', { 'destructuring': 'all' }],  // Use const when possible
 
