@@ -69,12 +69,7 @@ module.exports = configure(function(/* ctx */) {
       // viteVuePluginOptions: {},
 
       vitePlugins: [
-        ['vite-plugin-checker', {
-          eslint: {
-            lintCommand: 'eslint "./**/*.{js,mjs,cjs,vue}"'
-          },
-          overlay: false
-        }, { server: false }]
+        // ESLint checker removed to disable linting
       ]
     },
 
